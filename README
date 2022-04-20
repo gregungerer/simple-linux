@@ -1,0 +1,33 @@
+Simple-Linux
+------------
+
+Simple-linux is a set of scripts for simply and quickly building a runnable
+embedded linux system. It is targeted at generating the simplest possible
+system that can be run on various architecture and machine QEMU emulations.
+
+Initially is support for generating a non-MMU based ColdFire/M5208EVB
+linux image. It runs in QEMU or can be run on real hardware.
+
+This is designed to be as absolutely simple and minimal as possible.
+Only the first stage gcc is built (that is all we really need) and
+only the busybox package to provide a very basic user space. There are
+many fully fledged build systems out there, but this script is designed
+to be the absolute simplest possible build. The idea is that it shows
+the core requirements (or from scratch if you like) procedure in building
+a running system. QEMU provides the perfect means to try out the build.
+
+The build starts by building binutils and a first pass minimal gcc,
+then builds uClibc, busybox and finally a kernel. All source packages will
+be downloaded if not already present locally. The resulting kernel can be
+run using QEMU:
+
+Once you have the installed the simple-linux files locally, run the build
+script:
+
+    ./build-m68knommu-linux.sh
+
+and then run the resulting system:
+
+   qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-5.16/vmlinux
+
+
