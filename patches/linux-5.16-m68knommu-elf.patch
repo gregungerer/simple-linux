@@ -1,0 +1,152 @@
+From 6532df71b9dab999c054f30557eff4c50ff3d387 Mon Sep 17 00:00:00 2001
+From: Greg Ungerer <gerg@linux-m68k.org>
+Date: Tue, 26 Apr 2022 12:11:41 +1000
+Subject: [PATCH] linux-5.16: add support for ELF-FDPIC to m68k
+ architecture
+
+Add support to the m68k(nommu) archietcture to support the ELF-FDPIC
+executable program loader.
+
+It is all quite strait forward, nothing really special or different.
+Mostly adding some required defines ad setting the registers
+appropriately at exec time.
+
+Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
+---
+ arch/m68k/include/asm/elf.h         |    9 +++++++
+ arch/m68k/include/asm/mmu.h         |    4 ---
+ arch/m68k/include/uapi/asm/ptrace.h |    5 ++++
+ arch/m68k/kernel/ptrace.c           |   45 ++++++++++++++++++++++++++++++++++++
+ fs/Kconfig.binfmt                   |    2 -
+ 5 files changed, 61 insertions(+), 4 deletions(-)
+
+diff --git a/arch/m68k/include/asm/elf.h b/arch/m68k/include/asm/elf.h
+index 3d387ceaea3..c2d643a8631 100644
+--- a/arch/m68k/include/asm/elf.h
++++ b/arch/m68k/include/asm/elf.h
+@@ -60,6 +60,13 @@ typedef struct user_m68kfp_struct elf_fpregset_t;
+    is actually used on ASV.  */
+ #define ELF_PLAT_INIT(_r, load_addr)	_r->a1 = 0
+ 
++#define ELF_FDPIC_PLAT_INIT(_r, _exec_map_addr, _interp_map_addr, dynamic_addr) \
++        do { \
++                (_r)->d3 = _exec_map_addr; \
++                (_r)->d4 = _interp_map_addr; \
++                (_r)->d5 = dynamic_addr; \
++        } while(0)
++
+ #if defined(CONFIG_SUN3) || defined(CONFIG_COLDFIRE)
+ #define ELF_EXEC_PAGESIZE	8192
+ #else
+@@ -114,4 +124,6 @@ typedef struct user_m68kfp_struct elf_fpregset_t;
+ 
+ #define ELF_PLATFORM  (NULL)
+ 
++#define ELF_FDPIC_CORE_EFLAGS  0
++
+ #endif
+diff --git a/arch/m68k/include/asm/mmu.h b/arch/m68k/include/asm/mmu.h
+index 5c15aacb137..e00672425b0 100644
+--- a/arch/m68k/include/asm/mmu.h
++++ b/arch/m68k/include/asm/mmu.h
+@@ -6,9 +6,7 @@
+ /* Default "unsigned long" context */
+ typedef unsigned long mm_context_t;
+ #else
+-typedef struct {
+-	unsigned long		end_brk;
+-} mm_context_t;
++#include <asm-generic/mmu.h>
+ #endif
+ 
+ #endif
+diff --git a/arch/m68k/include/uapi/asm/ptrace.h b/arch/m68k/include/uapi/asm/ptrace.h
+index 19a1b9d0d85..66df44698fb 100644
+--- a/arch/m68k/include/uapi/asm/ptrace.h
++++ b/arch/m68k/include/uapi/asm/ptrace.h
+@@ -74,7 +74,12 @@ struct switch_stack {
+ 
+ #define PTRACE_GET_THREAD_AREA    25
+ 
++#define PTRACE_GETFDPIC         31
++
+ #define PTRACE_SINGLEBLOCK	33	/* resume execution until next branch */
+ 
++#define PTRACE_GETFDPIC_EXEC    0
++#define PTRACE_GETFDPIC_INTERP  1
++
+ #endif /* __ASSEMBLY__ */
+ #endif /* _UAPI_M68K_PTRACE_H */
+diff --git a/arch/m68k/kernel/ptrace.c b/arch/m68k/kernel/ptrace.c
+index aa3a0b8d07e..a84cb365f1f 100644
+--- a/arch/m68k/kernel/ptrace.c
++++ b/arch/m68k/kernel/ptrace.c
+@@ -20,6 +20,7 @@
+ #include <linux/user.h>
+ #include <linux/signal.h>
+ #include <linux/tracehook.h>
++#include <linux/regset.h>
+ 
+ #include <linux/uaccess.h>
+ #include <asm/page.h>
+@@ -292,3 +293,47 @@ asmlinkage void syscall_trace_leave(void)
+ 		tracehook_report_syscall_exit(task_pt_regs(current), 0);
+ }
+ #endif /* CONFIG_COLDFIRE */
++
++#if defined(CONFIG_BINFMT_ELF_FDPIC) && defined(CONFIG_ELF_CORE)
++/*
++ * Currently the only thing that needs to use regsets for m68k is the
++ * coredump support of the elf_fdpic loader. Implement the minimum
++ * definitions required for that.
++ */
++enum m68k_regset {
++	REGSET_GPR,
++#ifdef CONFIG_FPU
++	REGSET_FPU,
++#endif
++};
++
++static const struct user_regset m68k_regsets[] = {
++	[REGSET_GPR] = {
++		.core_note_type = NT_PRSTATUS,
++		.n = ELF_NGREG,
++		.size = sizeof(u32),
++		.align = sizeof(u16),
++	},
++#ifdef CONFIG_FPU
++	[REGSET_FPU] = {
++		.core_note_type = NT_PRFPREG,
++		.n = sizeof(struct user_m68kfp_struct) / sizeof(u32),
++		.size = sizeof(u32),
++		.align = sizeof(u32),
++	}
++#endif /* CONFIG_FPU */
++};
++
++static const struct user_regset_view user_m68k_view = {
++	.name = "m68k",
++	.e_machine = EM_68K,
++	.ei_osabi = ELF_OSABI,
++        .regsets = m68k_regsets,
++	.n = ARRAY_SIZE(m68k_regsets)
++};
++
++const struct user_regset_view *task_user_regset_view(struct task_struct *task)
++{
++	return &user_m68k_view;
++}
++#endif /* CONFIG_BINFMT_ELF_FDPIC && CONFIG_ELF_CORE */
+diff --git a/fs/Kconfig.binfmt b/fs/Kconfig.binfmt
+index 4d5ae61580a..073360aa982 100644
+--- a/fs/Kconfig.binfmt
++++ b/fs/Kconfig.binfmt
+@@ -45,7 +45,7 @@ config ARCH_USE_GNU_PROPERTY
+ config BINFMT_ELF_FDPIC
+ 	bool "Kernel support for FDPIC ELF binaries"
+ 	default y if !BINFMT_ELF
+-	depends on (ARM || (SUPERH && !MMU))
++	depends on (ARM || (SUPERH && !MMU) || M68K)
+ 	select ELFCORE
+ 	help
+ 	  ELF FDPIC binaries are based on ELF, but allow the individual load

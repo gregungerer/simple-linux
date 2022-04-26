@@ -1,0 +1,137 @@
+From c2e47515b7ca9d6398105888063d1aa0a18508d3 Mon Sep 17 00:00:00 2001
+From: Greg Ungerer <gerg@linux-m68k.org>
+Date: Tue, 26 Apr 2022 12:14:24 +1000
+Subject: [PATCH] uClibc-0.9.33.2: add ELF-FDPIC support for m68knommu
+
+Add hacky support for ELF-FDPIC executables to the m68knommu code.
+This is really just ELF support not full FDPIC support.
+
+The major addition is a dynamic loader into the process startup code.
+This avoids a separate runtime link loader. It is actually pretty
+strait forward for the m68k case, only a dozen or so extra instructions
+required. It is basically simplistic processing of the relocation table.
+
+This is a work in progress and used for testing the kernels new m68k
+ELF-FDPIC support.
+
+Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
+---
+ crt1.S |   68 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 59 insertions(+), 9 deletions(-)
+
+diff --git a/libc/sysdeps/linux/m68k/crt1.S b/libc/sysdeps/linux/m68k/crt1.S
+--- uClibc/libc/sysdeps/linux/m68k/crt1.S.org	2022-04-24 10:21:31.336553342 +1000
++++ uClibc/libc/sysdeps/linux/m68k/crt1.S	2022-04-26 01:27:51.799747075 +1000
+@@ -64,6 +64,16 @@
+ 		8(%sp)			envp
+ */
+ 
++/*
++ * On no-MMU m68k/ColdFire machines using ELF format (either strait ELF or
++ * ELF-FDPIC) the entry setup is the same as for MMU Linux (as above).
++ * With the following additional registers setup:
++ *
++ * %d3		"exec_map_addr" (absolute text start address)
++ * %d4		"interp_map_addr" pointer
++ * %d5		"dynamic_map_addr" table pointer
++ */
++
+ 	.text
+ 	.type	_init,%function
+ 	.type	_fini,%function
+@@ -79,12 +89,49 @@
+ 	sub.l %fp, %fp
+ 
+ #if !defined __ARCH_USE_MMU__ && defined __PIC__
++#ifdef FDPIC_LOADER
++	/*
++	 * Find our absolute load address.
++	 * PIC code on the m68k expects the GOT pointer to be in %a5.
++	 */
++	move.l %d3, %a0
++	move.l 4(%a0), %a0		/* get absolute load address */
++
++	mov.l %a0, %a5
++	add.l #_GLOBAL_OFFSET_TABLE_, %a5
++
++	/*
++	 * Process the dynamic relocations. This is pretty simple on
++	 * the M68k machines. We just need to find the relocation section,
++	 * and process each 12-byte entry.
++	 */
++	move.l %d5, %a3
++	move.l 0x4c(%a3), %a2		/* offset of .rela.dyn */
++	add.l %a0, %a2			/* address of .rela.dyn */
++	move.l 0x54(%a3), %a3		/* size of .rela.dyn section */
++	add.l %a2, %a3			/* end address of .rela.dyn */
++
++1:	move.l 8(%a2), %d0		/* get relocation->addend */
++	cmp.l #0, %d0			/* check if null */
++	beq 2f
++
++	move.l (%a2), %a4		/* get relocation->address */
++	add.l %a0, %a4
++	add.l %a0, %d0
++	move.l %d0, (%a4)		/* write relocated value */
++
++2:	add.l #12, %a2			/* check if done procesing table */
++	cmp.l %a3, %a2
++	blt 1b
++
++#else
+ 	/* Set up the global pointer.  The GOT is at the beginning of the
+ 	   data segment, whose address is in %d5.  */
+ 	move.l %d5,%a5
++#endif
+ 	.equ have_current_got, 1
+ #endif
+-	
++
+ #ifdef __UCLIBC_FORMAT_SHARED_FLAT__
+ 	CALL __shared_flat_add_library,%a1
+ #endif
+@@ -93,22 +140,22 @@
+ 	   arguments for `main': argc, argv.  envp will be determined
+ 	   later in __libc_start_main.  */
+ 	move.l (%sp)+, %d0	/* Pop the argument count.  */
+-#ifndef __ARCH_USE_MMU__
+-	move.l (%sp)+, %a0
+-#else
++#if defined(__ARCH_USE_MMU__) || defined(FDPIC_LOADER)
+ 	move.l %sp, %a0		/* The argument vector starts just at the
+ 				   current stack top.  */
++#else
++	move.l (%sp)+, %a0
+ #endif
+ 
+ 	/* Provide the highest stack address to the user code (for stacks
+ 	   which grow downward).  */
+ 	pea (%sp)
+ 
+-#ifndef __ARCH_USE_MMU__
+-	clr.l -(%sp)
+-#else
++#if defined(__ARCH_USE_MMU__) || defined(FDPIC_LOADER)
+ 	pea (%a1)		/* Push address of the shared library
+ 				   termination function.  */
++#else
++	clr.l -(%sp)
+ #endif
+ 
+ 	/* Push the address of our own entry points to `.fini' and
+@@ -117,8 +164,11 @@
+ 	PEA_TEXT __shared_flat_fini,%a1
+ 	PEA_TEXT __shared_flat_init,%a1
+ #else
+-	PEA_TEXT _fini,%a1
+-	PEA_TEXT _init,%a1
++	//PEA_TEXT _fini,%a1
++	//PEA_TEXT _init,%a1
++	/* GERG FIXME: what are _init/_fini? */
++	clr.l -(%sp)
++	clr.l -(%sp)
+ #endif
+ 
+ 	pea (%a0)		/* Push second argument: argv.  */
+-- 
+2.25.1
