@@ -1,12 +1,13 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 #
-# build-m68knommu-linux.sh -- build really simple linux for m68knommu
+# build-m68knommu-flt-linux.sh -- build really simple linux for m68knommu
 #
 # (C) Copyright 2022, Greg Ungerer (gerg@linux-m68k.org)
 #
-# This script carries out a simple build of an m68k based user space
+# This script carries out a simple build of an m68knommu based user space
 # and linux for use with the ColdFire/m5208evb qemu emulated machine.
+# This build is designed to make a "flt" execuatble format system.
 #
 # This is designed to be as absolutely simple and minimal as possible.
 # Only the first stage gcc is built (that is all we really need) and
@@ -21,6 +22,7 @@
 
 CPU=m68k
 TARGET=m68k-uclinux
+FLAVOR=m68knommu-flt
 BOARD=m5208evb
 
 BINUTILS_VERSION=2.25.1
@@ -41,7 +43,7 @@ ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
 ROOTFS=${ROOTDIR}/rootfs
 
-PATH=${PATH}:${TOOLCHAIN}/bin
+PATH=${TOOLCHAIN}/bin:${PATH}
 
 fetch_file()
 {
@@ -116,15 +118,13 @@ build_uClibc()
 	fetch_file ${UCLIBC_URL}
 
 	tar xvJf uClibc-${UCLIBC_VERSION}.tar.xz
-	cp uClibc-${UCLIBC_VERSION}-${CPU}.config uClibc-${UCLIBC_VERSION}/.config
+	cp uClibc-${UCLIBC_VERSION}-${FLAVOR}.config uClibc-${UCLIBC_VERSION}/.config
 	cd uClibc-${UCLIBC_VERSION}
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
 	sed -i "s/^RUNTIME_PREFIX=.*\$/RUNTIME_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
 	sed -i "s/^DEVEL_PREFIX=.*\$/DEVEL_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
-	sed -i "s/^MULTILIB_DIR=.*\$/MULTILIB_DIR=\"lib\/m5208\/msep-data\"/" .config
-	sed -i "s/^UCLIBC_EXTRA_CFLAGS=.*\$/UCLIBC_EXTRA_CFLAGS=\"-mcpu=5208 -msep-data\"/" .config
 
 	make oldconfig CROSS=${TARGET}- TARGET_ARCH=${CPU} < /dev/null
 	make -j install CROSS=${TARGET}- TARGET_ARCH=${CPU} || exit 1
@@ -156,10 +156,10 @@ build_busybox()
 	fetch_file ${BUSYBOX_URL}
 
 	tar xvjf busybox-${BUSYBOX_VERSION}.tar.bz2
-	cp busybox-${BUSYBOX_VERSION}.config busybox-${BUSYBOX_VERSION}/.config
+	cp busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
 	cd busybox-${BUSYBOX_VERSION}
 	make oldconfig
-	make -j CROSS_COMPILE=${TARGET}- CFLAGS="-mcpu=5208 -msep-data" CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
+	make -j CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
 	cd ../
 }
 

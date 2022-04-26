@@ -24,7 +24,7 @@ run using QEMU:
 Once you have the installed the simple-linux files locally, run the build
 script:
 
-    ./build-m68knommu-linux.sh
+    ./build-m68knommu-flt-linux.sh
 
 and then run the resulting system:
 
