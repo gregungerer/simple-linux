@@ -118,7 +118,7 @@ build_uClibc()
 	fetch_file ${UCLIBC_URL}
 
 	tar xvJf uClibc-${UCLIBC_VERSION}.tar.xz
-	cp uClibc-${UCLIBC_VERSION}-${FLAVOR}.config uClibc-${UCLIBC_VERSION}/.config
+	cp configs/uClibc-${UCLIBC_VERSION}-${FLAVOR}.config uClibc-${UCLIBC_VERSION}/.config
 	cd uClibc-${UCLIBC_VERSION}
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
@@ -156,7 +156,7 @@ build_busybox()
 	fetch_file ${BUSYBOX_URL}
 
 	tar xvjf busybox-${BUSYBOX_VERSION}.tar.bz2
-	cp busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
+	cp configs/busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
 	cd busybox-${BUSYBOX_VERSION}
 	make oldconfig
 	make -j CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
@@ -188,7 +188,7 @@ build_linux()
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- ${BOARD}_defconfig
 
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
-	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/rootfs.dev\"" >> .config
+	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- olddefconfig < /dev/null
