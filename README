@@ -8,7 +8,7 @@ system that can be run on various architecture and machine QEMU emulations.
 Initially is support for generating a non-MMU based ColdFire/M5208EVB
 linux image. It runs in QEMU or can be run on real hardware. Next was
 added support for building ELF based m68knommu systems. Others will
-follow.
+follow. And now is new support for build an ARM nommu system as well.
 
 This is designed to be as absolutely simple and minimal as possible.
 Only the first stage gcc is built (that is all we really need) and
@@ -22,6 +22,7 @@ The build starts by building binutils and a first pass minimal gcc,
 then builds uClibc, busybox and finally a kernel. All source packages will
 be downloaded if not already present locally. The resulting kernel can be
 run using QEMU.
+
 
 
 m68k-nommu
@@ -42,5 +43,22 @@ You can try that out with:
 
     ./build-m68knommu-elf-linux.sh
 
-It can be run with same qemu command line as above.
+It can be run with same QEMU command line as above.
+
+
+
+arm-nommu
+---------
+
+QEMU has a nice ARM/versatile board emulation that is ideal for testing
+no-mmu ARM systems. The catch is that the kernel support for versatile
+running with no MMU has been broken for a few years now. It is easy to
+fix up with a patch, and that is included here. For a simple flat format
+build:
+
+    ./build-armnommu-flt-linux.sh
+
+and then run the resulting system:
+
+    qemu-system-arm -M versatilepb -nographic -kernel linux-5.16/arch/arm/boot/zImage -dtb linux-5.16/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
 
