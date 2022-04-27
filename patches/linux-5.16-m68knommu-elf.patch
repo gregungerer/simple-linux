@@ -13,12 +13,12 @@ appropriately at exec time.
 
 Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
 ---
- arch/m68k/include/asm/elf.h         |    9 +++++++
- arch/m68k/include/asm/mmu.h         |    4 ---
- arch/m68k/include/uapi/asm/ptrace.h |    5 ++++
- arch/m68k/kernel/ptrace.c           |   45 ++++++++++++++++++++++++++++++++++++
+ arch/m68k/include/asm/elf.h         |    9 +++++
+ arch/m68k/include/asm/mmu.h         |    4 --
+ arch/m68k/include/uapi/asm/ptrace.h |    5 +++
+ arch/m68k/kernel/ptrace.c           |   57 ++++++++++++++++++++++++++++++++++++
  fs/Kconfig.binfmt                   |    2 -
- 5 files changed, 61 insertions(+), 4 deletions(-)
+ 5 files changed, 73 insertions(+), 4 deletions(-)
 
 diff --git a/arch/m68k/include/asm/elf.h b/arch/m68k/include/asm/elf.h
 index 3d387ceaea3..c2d643a8631 100644
@@ -78,7 +78,7 @@ index 19a1b9d0d85..66df44698fb 100644
  #endif /* __ASSEMBLY__ */
  #endif /* _UAPI_M68K_PTRACE_H */
 diff --git a/arch/m68k/kernel/ptrace.c b/arch/m68k/kernel/ptrace.c
-index aa3a0b8d07e..a84cb365f1f 100644
+index aa3a0b8d07e..bda7a8781f8 100644
 --- a/arch/m68k/kernel/ptrace.c
 +++ b/arch/m68k/kernel/ptrace.c
 @@ -20,6 +20,7 @@
@@ -89,7 +89,7 @@ index aa3a0b8d07e..a84cb365f1f 100644
  
  #include <linux/uaccess.h>
  #include <asm/page.h>
-@@ -292,3 +293,47 @@ asmlinkage void syscall_trace_leave(void)
+@@ -292,3 +293,59 @@ asmlinkage void syscall_trace_leave(void)
  		tracehook_report_syscall_exit(task_pt_regs(current), 0);
  }
  #endif /* CONFIG_COLDFIRE */
@@ -100,6 +100,17 @@ index aa3a0b8d07e..a84cb365f1f 100644
 + * coredump support of the elf_fdpic loader. Implement the minimum
 + * definitions required for that.
 + */
++static int m68k_regset_get(struct task_struct *target,
++			   const struct user_regset *regset,
++			   struct membuf to)
++{
++	struct pt_regs *ptregs = task_pt_regs(target);
++	u32 uregs[ELF_NGREG];
++
++	ELF_CORE_COPY_REGS(uregs, ptregs);
++	return membuf_write(&to, uregs, sizeof(uregs));
++}
++
 +enum m68k_regset {
 +	REGSET_GPR,
 +#ifdef CONFIG_FPU
@@ -107,12 +118,13 @@ index aa3a0b8d07e..a84cb365f1f 100644
 +#endif
 +};
 +
-+static const struct user_regset m68k_regsets[] = {
++static const struct user_regset m68k_user_regsets[] = {
 +	[REGSET_GPR] = {
 +		.core_note_type = NT_PRSTATUS,
 +		.n = ELF_NGREG,
 +		.size = sizeof(u32),
 +		.align = sizeof(u16),
++		.regset_get = m68k_regset_get,
 +	},
 +#ifdef CONFIG_FPU
 +	[REGSET_FPU] = {
@@ -128,8 +140,8 @@ index aa3a0b8d07e..a84cb365f1f 100644
 +	.name = "m68k",
 +	.e_machine = EM_68K,
 +	.ei_osabi = ELF_OSABI,
-+        .regsets = m68k_regsets,
-+	.n = ARRAY_SIZE(m68k_regsets)
++	.regsets = m68k_user_regsets,
++	.n = ARRAY_SIZE(m68k_user_regsets)
 +};
 +
 +const struct user_regset_view *task_user_regset_view(struct task_struct *task)
