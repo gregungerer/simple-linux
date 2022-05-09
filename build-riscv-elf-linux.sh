@@ -182,7 +182,7 @@ build_linux()
 
 	cd linux-${LINUX_VERSION}
 
-	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- ${BOARD}_defconfig
+	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- defconfig
 
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
 	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
