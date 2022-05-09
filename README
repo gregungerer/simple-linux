@@ -7,8 +7,9 @@ system that can be run on various architecture and machine QEMU emulations.
 
 Initially is support for generating a non-MMU based ColdFire/M5208EVB
 linux image. It runs in QEMU or can be run on real hardware. Next was
-added support for building ELF based m68knommu systems. Others will
-follow. And now is new support for build an ARM nommu system as well.
+added support for building ELF based m68knommu systems, then support for
+building an ARM nommu system as well. The latest addition is for building
+a minimal RIS-V based system. More will follow over time.
 
 This is designed to be as absolutely simple and minimal as possible.
 Only the first stage gcc is built (that is all we really need) and
@@ -19,9 +20,9 @@ the core requirements (or from scratch if you like) procedure in building
 a running system. QEMU provides the perfect means to try out the build.
 
 The build starts by building binutils and a first pass minimal gcc,
-then builds uClibc, busybox and finally a kernel. All source packages will
-be downloaded if not already present locally. The resulting kernel can be
-run using QEMU.
+then builds uClibc (or musl as appropriate), busybox and finally a kernel.
+All source packages will be downloaded if not already present locally.
+The resulting kernel can be run using QEMU.
 
 
 
@@ -61,4 +62,20 @@ build:
 and then run the resulting system:
 
     qemu-system-arm -M versatilepb -nographic -kernel linux-5.16/arch/arm/boot/zImage -dtb linux-5.16/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
+
+
+
+RISC-V
+------
+
+QEMU has a nice generic RISC-V based syste emulation that is idea for
+testing RISC-V based Linux systems. This build uses the musl C-library
+instead of uClibc, but is otherwise similar to the other simple Linux
+builds. Build with:
+
+    ./build-riscv-elf-linux.sh
+
+and then run the resulting system:
+
+    qemu-system-riscv64 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-5.16/arch/riscv/boot/Image -append "console=ttyS0"
 
