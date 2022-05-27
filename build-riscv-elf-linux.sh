@@ -1,11 +1,11 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 #
-# build-riscv-elf-linux.sh -- build really simple linux for riscv
+# build-riscv-elf-linux.sh -- build really simple linux for RISC-V
 #
-# (C) Copyright 2022, Greg Ungerer (gerg@linux-m68k.org)
+# (C) Copyright 2022, Greg Ungerer (gerg@kernel.org)
 #
-# This script carries out a simple build of a riscv based user space
+# This script carries out a simple build of a RISC-V based user space
 # and linux for use with the standard qemu emulated machine.
 #
 # This is designed to be as absolutely simple and minimal as possible.
@@ -16,12 +16,12 @@
 # then builds musl, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#      qemu-system-riscv64 \
-#           -nographic \
-#           -machine virt \
-#           -bios opensbi/build/platform/generic/firmware/fw_jump.elf \
-#           -kernel linux-5.16/arch/riscv/boot/Image \
-#           -append "console=ttyS0"
+#	qemu-system-riscv64 \
+#		-nographic \
+#		-machine virt \
+#		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
+#		-kernel linux-5.16/arch/riscv/boot/Image \
+#		-append "console=ttyS0"
 #
 
 CPU=riscv
@@ -213,7 +213,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-m68knommu-elf-linux.sh [clean]"
+	echo "usage: build-riscv-elf-linux.sh [clean]"
 	exit 1
 fi
 
@@ -225,6 +225,5 @@ build_busybox
 build_finalize_rootfs
 build_opensbi
 build_linux
-
 
 exit 0

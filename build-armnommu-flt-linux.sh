@@ -3,7 +3,7 @@
 #
 # build-armnommu-flt-linux.sh -- build really simple linux for armnommu
 #
-# (C) Copyright 2022, Greg Ungerer (gerg@linux-m68k.org)
+# (C) Copyright 2022, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of an arm based user space
 # and linux for use with the ARM/versatile qemu emulated machine.
@@ -16,7 +16,11 @@
 # then builds uClibc, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-arm -M versatilepb -nographic -kernel linux*/arch/arm/boot/zImage -dtb linux-5.16/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
+#	qemu-system-arm -M versatilepb \
+#		-nographic  \
+#		-kernel linux-5.16/arch/arm/boot/zImage \
+#		-dtb linux-5.16/arch/arm/boot/dts/versatile-pb.dtb \
+#		-append "console=ttyAMA0,115200"
 #
 
 CPU=arm
@@ -213,7 +217,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-m68knommu-linux.sh [clean]"
+	echo "usage: build-armnommu-flt-linux.sh [clean]"
 	exit 1
 fi
 

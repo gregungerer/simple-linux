@@ -3,7 +3,7 @@
 #
 # build-m68knommu-elf-linux.sh -- build really simple linux for m68knommu
 #
-# (C) Copyright 2022, Greg Ungerer (gerg@linux-m68k.org)
+# (C) Copyright 2022, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of an m68k based user space
 # and linux for use with the ColdFire/m5208evb qemu emulated machine.

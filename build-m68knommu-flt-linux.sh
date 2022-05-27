@@ -3,7 +3,7 @@
 #
 # build-m68knommu-flt-linux.sh -- build really simple linux for m68knommu
 #
-# (C) Copyright 2022, Greg Ungerer (gerg@linux-m68k.org)
+# (C) Copyright 2022, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of an m68knommu based user space
 # and linux for use with the ColdFire/m5208evb qemu emulated machine.
@@ -17,7 +17,7 @@
 # then builds uClibc, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-5.16/vmlinux
 #
 
 CPU=m68k
@@ -216,7 +216,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-m68knommu-linux.sh [clean]"
+	echo "usage: build-m68knommu-flt-linux.sh [clean]"
 	exit 1
 fi
 
