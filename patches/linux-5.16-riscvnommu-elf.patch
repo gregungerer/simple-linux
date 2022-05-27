@@ -1,0 +1,241 @@
+From 6532df71b9dab999c054f30557eff4c50ff3d387 Mon Sep 17 00:00:00 2001
+From: Greg Ungerer <gerg@linux-m68k.org>
+Date: Tue, 26 Apr 2022 12:11:41 +1000
+Subject: [PATCH] riscv: add support for ELF-FDPIC to RISC-V
+ architecture
+
+Add support to the riscv64(nommu) architecture to support the ELF-FDPIC
+executable program loader.
+
+Some changes in the exitsing ELF-FDPIC code is required to support
+64-bit ELF structure types. Really changes make it agnostic as to the
+underlying natural word size - unlike the old code which was 32-bit
+specific.
+
+Signed-off-by: Greg Ungerer <gerg@kernel.org>
+---
+ arch/riscv/include/asm/elf.h   |   11 ++++++++++-
+ arch/riscv/include/asm/mmu.h   |    4 ++++
+ fs/Kconfig.binfmt              |    2 +-
+ fs/binfmt_elf_fdpic.c          |   28 ++++++++++++++--------------
+ include/linux/elf-fdpic.h      |    2 +-
+ include/uapi/linux/elf-fdpic.h |   18 +++++++++---------
+ include/uapi/linux/ptrace.h    |    6 ++++++
+ 7 files changed, 45 insertions(+), 26 deletions(-)
+
+diff --git a/arch/riscv/include/asm/elf.h b/arch/riscv/include/asm/elf.h
+index f53c40026c7..dfd3c46db82 100644
+--- a/arch/riscv/include/asm/elf.h
++++ b/arch/riscv/include/asm/elf.h
+@@ -32,6 +32,7 @@
+ #define elf_check_arch(x) ((x)->e_machine == EM_RISCV)
+ 
+ #define CORE_DUMP_USE_REGSET
++#define ELF_FDPIC_CORE_EFLAGS	0
+ #define ELF_EXEC_PAGESIZE	(PAGE_SIZE)
+ 
+ /*
+@@ -53,6 +54,13 @@
+ #define ELF_HWCAP	(elf_hwcap)
+ extern unsigned long elf_hwcap;
+ 
++#define ELF_FDPIC_PLAT_INIT(_r, _exec_map_addr, _interp_map_addr, dynamic_addr) \
++	do { \
++		(_r)->a1 = _exec_map_addr; \
++		(_r)->a2 = _interp_map_addr; \
++		(_r)->a3 = dynamic_addr; \
++	} while(0)
++
+ /*
+  * This yields a string that ld.so will use to load implementation
+  * specific libraries for optimization.  This is more specific in
+@@ -60,7 +69,6 @@ extern unsigned long elf_hwcap;
+  */
+ #define ELF_PLATFORM	(NULL)
+ 
+-#ifdef CONFIG_MMU
+ #define ARCH_DLINFO						\
+ do {								\
+ 	NEW_AUX_ENT(AT_SYSINFO_EHDR,				\
+@@ -78,6 +86,8 @@ do {								\
+ 	NEW_AUX_ENT(AT_L2_CACHEGEOMETRY,			\
+ 		get_cache_geometry(2, CACHE_TYPE_UNIFIED));	\
+ } while (0)
++
++#ifdef CONFIG_MMU
+ #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
+ struct linux_binprm;
+ extern int arch_setup_additional_pages(struct linux_binprm *bprm,
+diff --git a/arch/riscv/include/asm/mmu.h b/arch/riscv/include/asm/mmu.h
+index 0099dc11616..355504b37f8 100644
+--- a/arch/riscv/include/asm/mmu.h
++++ b/arch/riscv/include/asm/mmu.h
+@@ -20,6 +20,10 @@ typedef struct {
+ 	/* A local icache flush is needed before user execution can resume. */
+ 	cpumask_t icache_stale_mask;
+ #endif
++#ifdef CONFIG_BINFMT_ELF_FDPIC
++	unsigned long exec_fdpic_loadmap;
++	unsigned long interp_fdpic_loadmap;
++#endif
+ } mm_context_t;
+ 
+ void __init create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa,
+diff --git a/fs/Kconfig.binfmt b/fs/Kconfig.binfmt
+index 4d5ae61580a..f6b52414398 100644
+--- a/fs/Kconfig.binfmt
++++ b/fs/Kconfig.binfmt
+@@ -45,7 +45,7 @@ config ARCH_USE_GNU_PROPERTY
+ config BINFMT_ELF_FDPIC
+ 	bool "Kernel support for FDPIC ELF binaries"
+ 	default y if !BINFMT_ELF
+-	depends on (ARM || (SUPERH && !MMU))
++	depends on (ARM || ((SUPERH || RISCV) && !MMU))
+ 	select ELFCORE
+ 	help
+ 	  ELF FDPIC binaries are based on ELF, but allow the individual load
+diff --git a/fs/binfmt_elf_fdpic.c b/fs/binfmt_elf_fdpic.c
+index c6f588dc4a9..de539e01607 100644
+--- a/fs/binfmt_elf_fdpic.c
++++ b/fs/binfmt_elf_fdpic.c
+@@ -138,7 +138,7 @@ static int is_constdisp(struct elfhdr *hdr)
+ static int elf_fdpic_fetch_phdrs(struct elf_fdpic_params *params,
+ 				 struct file *file)
+ {
+-	struct elf32_phdr *phdr;
++	struct elf_phdr *phdr;
+ 	unsigned long size;
+ 	int retval, loop;
+ 	loff_t pos = params->hdr.e_phoff;
+@@ -559,8 +559,8 @@ static int create_elf_fdpic_tables(struct linux_binprm *bprm,
+ 	sp &= ~7UL;
+ 
+ 	/* stack the load map(s) */
+-	len = sizeof(struct elf32_fdpic_loadmap);
+-	len += sizeof(struct elf32_fdpic_loadseg) * exec_params->loadmap->nsegs;
++	len = sizeof(struct elf_fdpic_loadmap);
++	len += sizeof(struct elf_fdpic_loadseg) * exec_params->loadmap->nsegs;
+ 	sp = (sp - len) & ~7UL;
+ 	exec_params->map_addr = sp;
+ 
+@@ -570,8 +570,8 @@ static int create_elf_fdpic_tables(struct linux_binprm *bprm,
+ 	current->mm->context.exec_fdpic_loadmap = (unsigned long) sp;
+ 
+ 	if (interp_params->loadmap) {
+-		len = sizeof(struct elf32_fdpic_loadmap);
+-		len += sizeof(struct elf32_fdpic_loadseg) *
++		len = sizeof(struct elf_fdpic_loadmap);
++		len += sizeof(struct elf_fdpic_loadseg) *
+ 			interp_params->loadmap->nsegs;
+ 		sp = (sp - len) & ~7UL;
+ 		interp_params->map_addr = sp;
+@@ -739,12 +745,12 @@ static int elf_fdpic_map_file(struct elf_fdpic_params *params,
+ 			      struct mm_struct *mm,
+ 			      const char *what)
+ {
+-	struct elf32_fdpic_loadmap *loadmap;
++	struct elf_fdpic_loadmap *loadmap;
+ #ifdef CONFIG_MMU
+-	struct elf32_fdpic_loadseg *mseg;
++	struct elf_fdpic_loadseg *mseg;
+ #endif
+-	struct elf32_fdpic_loadseg *seg;
+-	struct elf32_phdr *phdr;
++	struct elf_fdpic_loadseg *seg;
++	struct elf_phdr *phdr;
+ 	unsigned long load_addr, stop;
+ 	unsigned nloads, tmp;
+ 	size_t size;
+@@ -766,7 +772,7 @@ static int elf_fdpic_map_file(struct elf_fdpic_params *params,
+ 
+ 	params->loadmap = loadmap;
+ 
+-	loadmap->version = ELF32_FDPIC_LOADMAP_VERSION;
++	loadmap->version = ELF_FDPIC_LOADMAP_VERSION;
+ 	loadmap->nsegs = nloads;
+ 
+ 	load_addr = params->load_addr;
+@@ -926,8 +932,8 @@ static int elf_fdpic_map_file_constdisp_on_uclinux(
+ 	struct file *file,
+ 	struct mm_struct *mm)
+ {
+-	struct elf32_fdpic_loadseg *seg;
+-	struct elf32_phdr *phdr;
++	struct elf_fdpic_loadseg *seg;
++	struct elf_phdr *phdr;
+ 	unsigned long load_addr, base = ULONG_MAX, top = 0, maddr = 0;
+ 	int loop, ret;
+ 
+@@ -1010,8 +1016,8 @@ static int elf_fdpic_map_file_by_direct_mmap(struct elf_fdpic_params *params,
+ 					     struct file *file,
+ 					     struct mm_struct *mm)
+ {
+-	struct elf32_fdpic_loadseg *seg;
+-	struct elf32_phdr *phdr;
++	struct elf_fdpic_loadseg *seg;
++	struct elf_phdr *phdr;
+ 	unsigned long load_addr, delta_vaddr;
+ 	int loop, dvset;
+ 
+diff --git a/include/linux/elf-fdpic.h b/include/linux/elf-fdpic.h
+index 3bea95a1af5..76224da3865 100644
+--- a/include/linux/elf-fdpic.h
++++ b/include/linux/elf-fdpic.h
+@@ -16,7 +16,7 @@
+ struct elf_fdpic_params {
+ 	struct elfhdr			hdr;		/* ref copy of ELF header */
+ 	struct elf_phdr			*phdrs;		/* ref copy of PT_PHDR table */
+-	struct elf32_fdpic_loadmap	*loadmap;	/* loadmap to be passed to userspace */
++	struct elf_fdpic_loadmap	*loadmap;	/* loadmap to be passed to userspace */
+ 	unsigned long			elfhdr_addr;	/* mapped ELF header user address */
+ 	unsigned long			ph_addr;	/* mapped PT_PHDR user address */
+ 	unsigned long			map_addr;	/* mapped loadmap user address */
+diff --git a/include/uapi/linux/elf-fdpic.h b/include/uapi/linux/elf-fdpic.h
+index 4fcc6cfebe1..f762aaa8cbb 100644
+--- a/include/uapi/linux/elf-fdpic.h
++++ b/include/uapi/linux/elf-fdpic.h
+@@ -18,18 +18,18 @@
+ #define PT_GNU_STACK    (PT_LOOS + 0x474e551)
+ 
+ /* segment mappings for ELF FDPIC libraries/executables/interpreters */
+-struct elf32_fdpic_loadseg {
+-	Elf32_Addr	addr;		/* core address to which mapped */
+-	Elf32_Addr	p_vaddr;	/* VMA recorded in file */
+-	Elf32_Word	p_memsz;	/* allocation size recorded in file */
++struct elf_fdpic_loadseg {
++	Elf_Addr	addr;		/* core address to which mapped */
++	Elf_Addr	p_vaddr;	/* VMA recorded in file */
++	Elf_Word	p_memsz;	/* allocation size recorded in file */
+ };
+ 
+-struct elf32_fdpic_loadmap {
+-	Elf32_Half	version;	/* version of these structures, just in case... */
+-	Elf32_Half	nsegs;		/* number of segments */
+-	struct elf32_fdpic_loadseg segs[];
++struct elf_fdpic_loadmap {
++	Elf_Half	version;	/* version of these structures, just in case... */
++	Elf_Half	nsegs;		/* number of segments */
++	struct elf_fdpic_loadseg segs[];
+ };
+ 
+-#define ELF32_FDPIC_LOADMAP_VERSION	0x0000
++#define ELF_FDPIC_LOADMAP_VERSION	0x0000
+ 
+ #endif /* _UAPI_LINUX_ELF_FDPIC_H */
+diff --git a/include/uapi/linux/ptrace.h b/include/uapi/linux/ptrace.h
+index 3747bf816f9..0754fb76247 100644
+--- a/include/uapi/linux/ptrace.h
++++ b/include/uapi/linux/ptrace.h
+@@ -24,6 +24,12 @@
+ 
+ #define PTRACE_SYSCALL		  24
+ 
++#define PTRACE_GETFDPIC		  31
++
++#define PTRACE_GETFDPIC_EXEC	0
++#define PTRACE_GETFDPIC_INTERP	1
++
++
+ /* 0x4200-0x4300 are reserved for architecture-independent additions.  */
+ #define PTRACE_SETOPTIONS	0x4200
+ #define PTRACE_GETEVENTMSG	0x4201

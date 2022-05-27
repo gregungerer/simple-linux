@@ -1,0 +1,52 @@
+From c2e47515b7ca9d6398105888063d1aa0a18508d3 Mon Sep 17 00:00:00 2001
+From: Greg Ungerer <gerg@linux-m68k.org>
+Date: Tue, 26 Apr 2022 12:14:24 +1000
+Subject: [PATCH] uClibc-ng-1.0.41: add ELF-FDPIC support for RISC-V
+
+Add hacky support for ELF-FDPIC executables to the RISC-V startup code.
+This is just ELF support not full ELF-FDPIC support.
+
+The major addition is a dynamic loader into the program startup code.
+This avoids a separate runtime link loader. It is actually pretty
+strait forward for the RISC-V case, only a dozen or so extra instructions
+required. It is basically simplistic processing of the relocation table.
+
+This is a work in progress and used for testing the kernels RISC-V
+ELF-FDPIC support. Consider it proof-of-concept more than anything else.
+
+Signed-off-by: Greg Ungerer <gerg@kernel.org>
+---
+ crt1.S |   20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff -Naurp uClibc-ng-1.0.41.org/libc/sysdeps/linux/riscv64/crt1.S uClibc-ng-1.0.41/libc/sysdeps/linux/riscv64/crt1.S
+--- uClibc-ng-1.0.41.org/libc/sysdeps/linux/riscv64/crt1.S	2022-05-21 01:07:47.000000000 +1000
++++ uClibc-ng-1.0.41/libc/sysdeps/linux/riscv64/crt1.S	2022-05-24 17:42:15.279728849 +1000
+@@ -49,7 +49,27 @@
+ 	.weak _fini
+ 
+ _start:
++#ifdef FDPIC_LOADER
++1:
++	ld a1,8(a1)
++	ld a2,0xf8(a3)
++	add a2,a2,a1
++	ld a3,0x108(a3)
++	add a3,a3,a2
++1:
++	ld t0,16(a2)
++	beqz t0,2f
++	ld t1,(a2)
++	add t1,t1,a1
++	add t0,t0,a1
++	sd t0,(t1)
++2:
++	addi a2,a2,24
++	bltu a2,a3,1b
++#endif
++
+ 	call  .Lload_gp
++
+ 	mv    a5, a0  /* rtld_fini.  */
+ 	/* main may be in a shared library.  */
+ 	la   a0, main
