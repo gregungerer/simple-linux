@@ -32,13 +32,13 @@ BOARD=m5208evb
 BINUTILS_VERSION=2.32
 GCC_VERSION=8.3.0
 UCLIBC_VERSION=0.9.33.2
-LINUX_VERSION=5.16
-BUSYBOX_VERSION=1.34.1
+LINUX_VERSION=6.0
+BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_URL=https://www.uclibc.org/downloads/uClibc-${UCLIBC_VERSION}.tar.xz
-LINUX_URL=https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz
+LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
 
 ROOTDIR=$(pwd)
@@ -179,8 +179,6 @@ build_linux()
 	echo "BUILD: building linux-${LINUX_VERSION}"
 
 	cd linux-${LINUX_VERSION}
-
-	patch -p1 < ../patches/linux-${LINUX_VERSION}-${FLAVOR}.patch
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- ${BOARD}_defconfig
 

@@ -29,13 +29,13 @@ BINUTILS_VERSION=2.25.1
 GCC_VERSION=8.3.0
 ELF2FLT_VERSION=2019.12
 UCLIBC_VERSION=0.9.33.2
-LINUX_VERSION=5.16
-BUSYBOX_VERSION=1.34.1
+LINUX_VERSION=6.0
+BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_URL=https://www.uclibc.org/downloads/uClibc-${UCLIBC_VERSION}.tar.xz
-LINUX_URL=https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz
+LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
 ELF2FLT_URL=https://github.com/uclinux-dev/elf2flt/archive/refs/tags/v${ELF2FLT_VERSION}.tar.gz
 
@@ -165,7 +165,7 @@ build_busybox()
 
 build_finalize_rootfs()
 {
-	echo "BUILD- finalizing rootfs"
+	echo "BUILD: finalizing rootfs"
 
 	mkdir -p ${ROOTFS}/etc
 	mkdir -p ${ROOTFS}/proc

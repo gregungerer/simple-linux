@@ -37,7 +37,7 @@ the simple-linux files locally, run the build script:
 
 and then run the resulting system:
 
-   qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-5.16/vmlinux
+   qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.0/vmlinux
 
 There is also now an experimental build using ELF format executables.
 You can try that out with:
