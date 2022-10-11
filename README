@@ -77,7 +77,7 @@ builds. Build with:
 
 and then run the resulting system:
 
-    qemu-system-riscv64 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-5.16/arch/riscv/boot/Image -append "console=ttyS0"
+    qemu-system-riscv64 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-6.0/arch/riscv/boot/Image -append "console=ttyS0"
 
 
 
