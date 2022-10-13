@@ -20,7 +20,7 @@
 #		-cpu rv64,mmu=false \
 #		-nographic \
 #		-machine virt \
-#		-bios linux-5.16/arch/riscv/boot/Image
+#		-bios linux-5.19/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -30,9 +30,9 @@ BOARD=qemu
 
 BINUTILS_VERSION=2.37
 GCC_VERSION=11.2.0
-UCLIBC_NG_VERSION=1.0.41
-LINUX_VERSION=5.16
-BUSYBOX_VERSION=1.34.1
+UCLIBC_NG_VERSION=1.0.42
+LINUX_VERSION=5.19
+BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

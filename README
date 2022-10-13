@@ -92,5 +92,5 @@ To build that:
 
 and then run the resulting system:
 
-    qemu-system-riscv64 -cpu rv64,mmu=false -nographic -machine virt -bios linux-5.16/arch/riscv/boot/Imag
+    qemu-system-riscv64 -cpu rv64,mmu=false -nographic -machine virt -bios linux-5.19/arch/riscv/boot/Image
 
