@@ -169,11 +169,14 @@ build_finalize_rootfs()
 
 	mkdir -p ${ROOTFS}/etc
 	mkdir -p ${ROOTFS}/proc
+	mkdir -p ${ROOTFS}/sys
+
 	echo "::sysinit:/etc/rc" > ${ROOTFS}/etc/inittab
 	echo "::respawn:/bin/sh" >> ${ROOTFS}/etc/inittab
 
 	echo "#!/bin/sh" > ${ROOTFS}/etc/rc
 	echo "mount -t proc proc /proc" >> ${ROOTFS}/etc/rc
+	echo "mount -t sysfs sys /sys" >> ${ROOTFS}/etc/rc
 	echo "echo -e \"\\nSimple Linux\\n\\n\"" >> ${ROOTFS}/etc/rc
 	chmod 755 ${ROOTFS}/etc/rc
 

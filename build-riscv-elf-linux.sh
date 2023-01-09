@@ -148,8 +148,9 @@ build_finalize_rootfs()
 	echo "BUILD- finalizing rootfs"
 
 	mkdir -p ${ROOTFS}/etc
-	mkdir -p ${ROOTFS}/proc
 	mkdir -p ${ROOTFS}/lib
+	mkdir -p ${ROOTFS}/proc
+	mkdir -p ${ROOTFS}/sys
 
 	cp musl-${MUSL_VERSION}/lib/libc.so ${ROOTFS}/lib/
 	ln -s /lib/libc.so ${ROOTFS}/lib/ld-linux-riscv64-lp64d.so.1
@@ -159,6 +160,7 @@ build_finalize_rootfs()
 
 	echo "#!/bin/sh" > ${ROOTFS}/etc/rc
 	echo "mount -t proc proc /proc" >> ${ROOTFS}/etc/rc
+	echo "mount -t sysfs sys /sys" >> ${ROOTFS}/etc/rc
 	echo "echo -e \"\\nSimple Linux\\n\\n\"" >> ${ROOTFS}/etc/rc
 	chmod 755 ${ROOTFS}/etc/rc
 
