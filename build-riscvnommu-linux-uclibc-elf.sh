@@ -1,9 +1,9 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 #
-# build-riscvnommu-elf-linux.sh -- build really simple nommu linux for RISC-V
+# build-riscvnommu-linux-uclibc-elf.sh -- build really simple nommu linux for RISC-V
 #
-# (C) Copyright 2022, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2023, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of a RISCV-V based user space
 # and linux for use with the standard qemu emulated machine.

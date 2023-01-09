@@ -1,12 +1,13 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 #
-# build-m68knommu-elf-linux.sh -- build really simple linux for m68knommu
+# build-m68knommu-linux-uclibc-flt.sh -- build really simple linux for m68knommu
 #
-# (C) Copyright 2022, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2023, Greg Ungerer (gerg@kernel.org)
 #
-# This script carries out a simple build of an m68k based user space
+# This script carries out a simple build of an m68knommu based user space
 # and linux for use with the ColdFire/m5208evb qemu emulated machine.
+# This build is designed to make a "flt" execuatble format system.
 #
 # This is designed to be as absolutely simple and minimal as possible.
 # Only the first stage gcc is built (that is all we really need) and
@@ -16,21 +17,17 @@
 # then builds uClibc, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel vmlinux
-#
-# Note that this build is designed around the experimental ELF loader
-# support for m68knommu - not the older bflt executable file format.
-# So there are a few patches required to uClibc and the linux kernel
-# to make this work. Consider it a work in progress.
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-5.16/vmlinux
 #
 
 CPU=m68k
-TARGET=m68k-linux
-FLAVOR=m68knommu-elf
+TARGET=m68k-uclinux
+FLAVOR=m68knommu-flt
 BOARD=m5208evb
 
-BINUTILS_VERSION=2.32
+BINUTILS_VERSION=2.25.1
 GCC_VERSION=8.3.0
+ELF2FLT_VERSION=2019.12
 UCLIBC_VERSION=0.9.33.2
 LINUX_VERSION=6.0
 BUSYBOX_VERSION=1.35.0
@@ -40,6 +37,7 @@ GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_URL=https://www.uclibc.org/downloads/uClibc-${UCLIBC_VERSION}.tar.xz
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
+ELF2FLT_URL=https://github.com/uclinux-dev/elf2flt/archive/refs/tags/v${ELF2FLT_VERSION}.tar.gz
 
 ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
@@ -78,14 +76,6 @@ build_gcc()
 
 	tar xvJf gcc-${GCC_VERSION}.tar.xz
 	cd gcc-${GCC_VERSION}
-
-	#
-	# Need to get gcc to generate _all_ the multilib variants
-	# (so both MMU and non-mmu M68k and ColdFire).
-	#
-	sed -i 's/M68K_MLIB_CPU +=/#M68K_MLIB_CPU +=/' gcc/config/m68k/t-m68k
-	sed -i 's/&& (FLAGS ~ "FL_MMU")//' gcc/config/m68k/t-linux
-
 	contrib/download_prerequisites
 	mkdir ${TARGET}
 	cd ${TARGET}
@@ -131,8 +121,6 @@ build_uClibc()
 	cp configs/uClibc-${UCLIBC_VERSION}-${FLAVOR}.config uClibc-${UCLIBC_VERSION}/.config
 	cd uClibc-${UCLIBC_VERSION}
 
-	patch -p1 < ../patches/uClibc-${UCLIBC_VERSION}-${FLAVOR}.patch
-
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
 	sed -i "s/^RUNTIME_PREFIX=.*\$/RUNTIME_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
@@ -140,7 +128,25 @@ build_uClibc()
 
 	make oldconfig CROSS=${TARGET}- TARGET_ARCH=${CPU} < /dev/null
 	make -j install CROSS=${TARGET}- TARGET_ARCH=${CPU} || exit 1
-	ln ${TOOLCHAIN}/${TARGET}/lib/crt1.o ${TOOLCHAIN}/${TARGET}/lib/Scrt1.o
+	cd ../
+}
+
+build_elf2flt()
+{
+	echo "BUILD: building elf2flt-${ELF2FLT_VERSION}"
+	fetch_file ${ELF2FLT_URL}
+
+	tar xvzf v${ELF2FLT_VERSION}.tar.gz
+	cd elf2flt-${ELF2FLT_VERSION}
+	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
+		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
+		--with-bfd-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd \
+		--with-binutils-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/include \
+		--disable-werror \
+		--prefix=${TOOLCHAIN} \
+		--target=${TARGET}
+	make || exit 1
+	make install || exit 1
 	cd ../
 }
 
@@ -153,13 +159,13 @@ build_busybox()
 	cp configs/busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
 	cd busybox-${BUSYBOX_VERSION}
 	make oldconfig
-	make -j CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install
+	make -j CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
 	cd ../
 }
 
 build_finalize_rootfs()
 {
-	echo "BUILD- finalizing rootfs"
+	echo "BUILD: finalizing rootfs"
 
 	mkdir -p ${ROOTFS}/etc
 	mkdir -p ${ROOTFS}/proc
@@ -174,7 +180,7 @@ build_finalize_rootfs()
 	echo "echo -e \"\\nSimple Linux\\n\\n\"" >> ${ROOTFS}/etc/rc
 	chmod 755 ${ROOTFS}/etc/rc
 
-	ln -sf /sbin/init ${ROOTFS}/init
+	ln -s /sbin/init ${ROOTFS}/init
 }
 
 build_linux()
@@ -182,7 +188,6 @@ build_linux()
 	echo "BUILD: building linux-${LINUX_VERSION}"
 
 	cd linux-${LINUX_VERSION}
-
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- ${BOARD}_defconfig
 
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
@@ -206,6 +211,7 @@ then
 	rm -rf gcc-${GCC_VERSION}
 	rm -rf linux-${LINUX_VERSION}
 	rm -rf uClibc-${UCLIBC_VERSION}
+	rm -rf elf2flt-${ELF2FLT_VERSION}
 	rm -rf busybox-${BUSYBOX_VERSION}
 	rm -rf ${TOOLCHAIN}
 	rm -rf ${ROOTFS}
@@ -213,7 +219,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-m68knommu-elf-linux.sh [clean]"
+	echo "usage: build-m68knommu-flt-linux.sh [clean]"
 	exit 1
 fi
 
@@ -221,6 +227,7 @@ build_binutils
 build_gcc
 build_linux_headers
 build_uClibc
+build_elf2flt
 build_busybox
 build_finalize_rootfs
 build_linux
