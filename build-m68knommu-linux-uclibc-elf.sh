@@ -16,7 +16,7 @@
 # then builds uClibc, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.0/vmlinux
 #
 # Note that this build is designed around the experimental ELF loader
 # support for m68knommu - not the older bflt executable file format.

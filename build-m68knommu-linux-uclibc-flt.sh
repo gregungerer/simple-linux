@@ -17,7 +17,7 @@
 # then builds uClibc, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-5.16/vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.0/vmlinux
 #
 
 CPU=m68k
