@@ -33,7 +33,7 @@ The traditional m68knommu build uses flat format executables. So the
 simplest and most strait forward build uses that. Once you have installed
 the simple-linux files locally, run the build script:
 
-    ./build-m68knommu-flt-linux.sh
+    ./build-m68knommu-linux-uclibc-flt.sh
 
 and then run the resulting system:
 
@@ -42,7 +42,7 @@ and then run the resulting system:
 There is also now an experimental build using ELF format executables.
 You can try that out with:
 
-    ./build-m68knommu-elf-linux.sh
+    ./build-m68knommu-linux-uclibc-elf.sh
 
 It can be run with same QEMU command line as above.
 
@@ -57,7 +57,7 @@ running with no MMU has been broken for a few years now. It is easy to
 fix up with a patch, and that is included here. For a simple flat format
 build:
 
-    ./build-armnommu-flt-linux.sh
+    ./build-armnommu-linux-uclibc-flt.sh
 
 and then run the resulting system:
 
@@ -73,11 +73,17 @@ testing RISC-V based Linux systems. This build uses the musl C-library
 instead of uClibc, but is otherwise similar to the other simple Linux
 builds. Build with:
 
-    ./build-riscv-elf-linux.sh
+    ./build-riscv-linux-musl-elf.sh
 
 and then run the resulting system:
 
     qemu-system-riscv64 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-6.0/arch/riscv/boot/Image -append "console=ttyS0"
+
+Or alternatively you can do a build using uClibc instead of musl with:
+
+    ./build-riscv-linux-uclibc-elf.sh
+
+Run with the same QEMU command line as above.
 
 
 
@@ -88,7 +94,7 @@ There is now an experimental RISC-V nommu build that supports ELF format
 binaries. Note this is not ELF-FDPIC, but rather PIE style ELF binaries.
 To build that:
 
-    ./build-riscvnommu-elf-linux.sh
+    ./build-riscvnommu-linux-uclibc-elf.sh
 
 and then run the resulting system:
 
