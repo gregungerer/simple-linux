@@ -52,10 +52,13 @@ fetch_file()
 {
 	URL=$1
 	PACKAGE=$(basename ${URL})
-	if [ ! -f ${PACKAGE} ]
+	mkdir -p downloads
+	if [ ! -f downloads/${PACKAGE} ]
 	then
 		echo "BUILD: fetching ${PACKAGE}"
+		cd downloads
 		wget ${URL}
+		cd ../
 	fi
 }
 
@@ -64,7 +67,7 @@ build_binutils()
 	echo "BUILD: building binutils-${BINUTILS_VERSION}"
 	fetch_file ${BINUTILS_URL}
 
-	tar xvjf binutils-${BINUTILS_VERSION}.tar.bz2
+	tar xvjf downloads/binutils-${BINUTILS_VERSION}.tar.bz2
 	cd binutils-${BINUTILS_VERSION}
 	./configure --target=${TARGET} --prefix=${TOOLCHAIN}
 	make || exit 1
@@ -77,7 +80,7 @@ build_gcc()
 	echo "BUILD: building gcc-${GCC_VERSION}"
 	fetch_file ${GCC_URL}
 
-	tar xvJf gcc-${GCC_VERSION}.tar.xz
+	tar xvJf downloads/gcc-${GCC_VERSION}.tar.xz
 	cd gcc-${GCC_VERSION}
 	contrib/download_prerequisites
 	mkdir ${TARGET}
@@ -107,7 +110,7 @@ build_linux_headers()
 	echo "BUILD: building linux-${LINUX_VERSION} headers"
 	fetch_file ${LINUX_URL}
 
-	tar xvJf linux-${LINUX_VERSION}.tar.xz
+	tar xvJf downloads/linux-${LINUX_VERSION}.tar.xz
 	cd linux-${LINUX_VERSION}
 	make ARCH=${CPU} defconfig
 	make ARCH=${CPU} headers_install || exit 1
@@ -120,7 +123,7 @@ build_uClibc()
 	echo "BUILD: building uClibc-${UCLIBC_VERSION}"
 	fetch_file ${UCLIBC_URL}
 
-	tar xvJf uClibc-${UCLIBC_VERSION}.tar.xz
+	tar xvJf downloads/uClibc-${UCLIBC_VERSION}.tar.xz
 	cp configs/uClibc-${UCLIBC_VERSION}-${FLAVOR}.config uClibc-${UCLIBC_VERSION}/.config
 	cd uClibc-${UCLIBC_VERSION}
 
@@ -139,7 +142,7 @@ build_elf2flt()
 	echo "BUILD: building elf2flt-${ELF2FLT_VERSION}"
 	fetch_file ${ELF2FLT_URL}
 
-	tar xvzf v${ELF2FLT_VERSION}.tar.gz
+	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
 	cd elf2flt-${ELF2FLT_VERSION}
 	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
 		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
@@ -158,7 +161,7 @@ build_busybox()
 	echo "BUILD: building busybox-${BUSYBOX_VERSION}"
 	fetch_file ${BUSYBOX_URL}
 
-	tar xvjf busybox-${BUSYBOX_VERSION}.tar.bz2
+	tar xvjf downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
 	cp configs/busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
 	cd busybox-${BUSYBOX_VERSION}
 	make oldconfig
