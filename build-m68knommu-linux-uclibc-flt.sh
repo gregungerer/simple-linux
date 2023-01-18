@@ -222,7 +222,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-m68knommu-flt-linux.sh [clean]"
+	echo "usage: build-m68knommu-linux-uclibc-flt.sh [clean]"
 	exit 1
 fi
 

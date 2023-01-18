@@ -228,7 +228,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-riscv-elf-linux.sh [clean]"
+	echo "usage: build-riscv-linux-uclibc-elf.sh [clean]"
 	exit 1
 fi
 
