@@ -18,11 +18,6 @@
 #
 #  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.0/vmlinux
 #
-# Note that this build is designed around the experimental ELF loader
-# support for m68knommu - not the older bflt executable file format.
-# So there are a few patches required to uClibc and the linux kernel
-# to make this work. Consider it a work in progress.
-#
 
 CPU=m68k
 TARGET=m68k-linux
@@ -32,14 +27,16 @@ BOARD=m5208evb
 BINUTILS_VERSION=2.32
 GCC_VERSION=8.3.0
 UCLIBC_VERSION=0.9.33.2
-LINUX_VERSION=6.0
 BUSYBOX_VERSION=1.35.0
+ULDSO_VERSION=1.0.0
+LINUX_VERSION=6.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_URL=https://www.uclibc.org/downloads/uClibc-${UCLIBC_VERSION}.tar.xz
-LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
+ULDSO_URL=https://github.com/gregungerer/uldso/archive/refs/tags/v${ULDSO_VERSION}.tar.gz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
+LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 
 ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
@@ -147,6 +144,19 @@ build_uClibc()
 	cd ../
 }
 
+build_uldso()
+{
+	echo "BUILD: building uldso-${ULDSO_VERSION}"
+	fetch_file ${ULDSO_URL}
+
+	tar xvzf downloads/v${ULDSO_VERSION}.tar.gz
+	cd uldso-${ULDSO_VERSION}
+	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- EXTRA_CFLAGS="-mcpu=5208 -I${TOOLCHAIN}/${TARGET}/include"
+	mkdir -p ${ROOTFS}/lib
+	cp uld.so.1 ${ROOTFS}/lib/ld.so.1
+	cd ../
+}
+
 build_busybox()
 {
 	echo "BUILD: building busybox-${BUSYBOX_VERSION}"
@@ -209,6 +219,7 @@ then
 	rm -rf gcc-${GCC_VERSION}
 	rm -rf linux-${LINUX_VERSION}
 	rm -rf uClibc-${UCLIBC_VERSION}
+	rm -rf uldso-${ULDSO_VERSION}
 	rm -rf busybox-${BUSYBOX_VERSION}
 	rm -rf ${TOOLCHAIN}
 	rm -rf ${ROOTFS}
@@ -216,7 +227,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-m68knommu-elf-linux.sh [clean]"
+	echo "usage: build-m68knommu-linux-uclibc-elf.sh [clean]"
 	exit 1
 fi
 
@@ -224,6 +235,7 @@ build_binutils
 build_gcc
 build_linux_headers
 build_uClibc
+build_uldso
 build_busybox
 build_finalize_rootfs
 build_linux

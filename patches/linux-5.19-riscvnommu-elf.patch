@@ -17,15 +17,15 @@ Signed-off-by: Greg Ungerer <gerg@kernel.org>
  arch/riscv/include/asm/elf.h   |   11 ++++++++++-
  arch/riscv/include/asm/mmu.h   |    4 ++++
  fs/Kconfig.binfmt              |    2 +-
- fs/binfmt_elf_fdpic.c          |   28 ++++++++++++++--------------
- include/linux/elf-fdpic.h      |    2 +-
- include/uapi/linux/elf-fdpic.h |   18 +++++++++---------
+ fs/binfmt_elf_fdpic.c          |   38 +++++++++++++++++++-------------------
+ include/linux/elf-fdpic.h      |   14 +++++++++++++-
+ include/uapi/linux/elf-fdpic.h |   15 +++++++++++++++
  include/uapi/linux/ptrace.h    |    6 ++++++
- 7 files changed, 45 insertions(+), 26 deletions(-)
+ 7 files changed, 68 insertions(+), 22 deletions(-)
 
 diff -Naur linux-5.19.org/arch/riscv/include/asm/elf.h linux-5.19/arch/riscv/include/asm/elf.h
---- linux-5.19.org/arch/riscv/include/asm/elf.h	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/arch/riscv/include/asm/elf.h	2022-10-13 08:45:42.216070536 +1000
+--- linux-5.19.org/arch/riscv/include/asm/elf.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/arch/riscv/include/asm/elf.h	2023-01-16 10:37:14.453238468 +1000
 @@ -40,6 +40,7 @@
  #define compat_elf_check_arch	compat_elf_check_arch
  
@@ -66,8 +66,8 @@ diff -Naur linux-5.19.org/arch/riscv/include/asm/elf.h linux-5.19/arch/riscv/inc
  struct linux_binprm;
  extern int arch_setup_additional_pages(struct linux_binprm *bprm,
 diff -Naur linux-5.19.org/arch/riscv/include/asm/mmu.h linux-5.19/arch/riscv/include/asm/mmu.h
---- linux-5.19.org/arch/riscv/include/asm/mmu.h	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/arch/riscv/include/asm/mmu.h	2022-10-13 08:45:42.216070536 +1000
+--- linux-5.19.org/arch/riscv/include/asm/mmu.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/arch/riscv/include/asm/mmu.h	2023-01-16 10:37:14.453238468 +1000
 @@ -21,6 +21,10 @@
  	/* A local icache flush is needed before user execution can resume. */
  	cpumask_t icache_stale_mask;
@@ -80,8 +80,8 @@ diff -Naur linux-5.19.org/arch/riscv/include/asm/mmu.h linux-5.19/arch/riscv/inc
  
  void __init create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa,
 diff -Naur linux-5.19.org/fs/binfmt_elf_fdpic.c linux-5.19/fs/binfmt_elf_fdpic.c
---- linux-5.19.org/fs/binfmt_elf_fdpic.c	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/fs/binfmt_elf_fdpic.c	2022-10-13 08:45:42.216070536 +1000
+--- linux-5.19.org/fs/binfmt_elf_fdpic.c	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/fs/binfmt_elf_fdpic.c	2023-01-16 10:36:49.509114322 +1000
 @@ -138,7 +138,7 @@
  static int elf_fdpic_fetch_phdrs(struct elf_fdpic_params *params,
  				 struct file *file)
@@ -139,6 +139,32 @@ diff -Naur linux-5.19.org/fs/binfmt_elf_fdpic.c linux-5.19/fs/binfmt_elf_fdpic.c
  	loadmap->nsegs = nloads;
  
  	load_addr = params->load_addr;
+@@ -842,8 +842,8 @@
+ 			if (phdr->p_vaddr >= seg->p_vaddr &&
+ 			    phdr->p_vaddr + phdr->p_memsz <=
+ 			    seg->p_vaddr + seg->p_memsz) {
+-				Elf32_Dyn __user *dyn;
+-				Elf32_Sword d_tag;
++				Elf_Dyn __user *dyn;
++				Elf_Sword d_tag;
+ 
+ 				params->dynamic_addr =
+ 					(phdr->p_vaddr - seg->p_vaddr) +
+@@ -853,11 +853,11 @@
+ 				 * one item, and that the last item is a NULL
+ 				 * entry */
+ 				if (phdr->p_memsz == 0 ||
+-				    phdr->p_memsz % sizeof(Elf32_Dyn) != 0)
++				    phdr->p_memsz % sizeof(Elf_Dyn) != 0)
+ 					goto dynamic_error;
+ 
+-				tmp = phdr->p_memsz / sizeof(Elf32_Dyn);
+-				dyn = (Elf32_Dyn __user *)params->dynamic_addr;
++				tmp = phdr->p_memsz / sizeof(Elf_Dyn);
++				dyn = (Elf_Dyn __user *)params->dynamic_addr;
+ 				if (get_user(d_tag, &dyn[tmp - 1].d_tag) ||
+ 				    d_tag != 0)
+ 					goto dynamic_error;
 @@ -926,8 +926,8 @@
  	struct file *file,
  	struct mm_struct *mm)
@@ -162,21 +188,39 @@ diff -Naur linux-5.19.org/fs/binfmt_elf_fdpic.c linux-5.19/fs/binfmt_elf_fdpic.c
  	int loop, dvset;
  
 diff -Naur linux-5.19.org/fs/Kconfig.binfmt linux-5.19/fs/Kconfig.binfmt
---- linux-5.19.org/fs/Kconfig.binfmt	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/fs/Kconfig.binfmt	2022-10-13 10:18:10.384603871 +1000
+--- linux-5.19.org/fs/Kconfig.binfmt	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/fs/Kconfig.binfmt	2023-01-16 10:38:19.749564885 +1000
 @@ -58,7 +58,7 @@
  config BINFMT_ELF_FDPIC
  	bool "Kernel support for FDPIC ELF binaries"
  	default y if !BINFMT_ELF
 -	depends on ARM || ((M68K || SUPERH) && !MMU)
-+	depends on ARM || ((M68K || SUPERH || RISCV) && !MMU)
++	depends on ARM || ((M68K || RISCV || SUPERH) && !MMU)
  	select ELFCORE
  	help
  	  ELF FDPIC binaries are based on ELF, but allow the individual load
 diff -Naur linux-5.19.org/include/linux/elf-fdpic.h linux-5.19/include/linux/elf-fdpic.h
---- linux-5.19.org/include/linux/elf-fdpic.h	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/include/linux/elf-fdpic.h	2022-10-13 08:45:42.216070536 +1000
-@@ -16,7 +16,7 @@
+--- linux-5.19.org/include/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/include/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
+@@ -10,13 +10,25 @@
+ 
+ #include <uapi/linux/elf-fdpic.h>
+ 
++#if ELF_CLASS == ELFCLASS32
++#define Elf_Sword			Elf32_Sword
++#define elf_fdpic_loadseg		elf32_fdpic_loadseg
++#define elf_fdpic_loadmap		elf32_fdpic_loadmap
++#define ELF_FDPIC_LOADMAP_VERSION	ELF32_FDPIC_LOADMAP_VERSION
++#else
++#define Elf_Sword			Elf64_Sxword
++#define elf_fdpic_loadmap		elf64_fdpic_loadmap
++#define elf_fdpic_loadseg		elf64_fdpic_loadseg
++#define ELF_FDPIC_LOADMAP_VERSION	ELF64_FDPIC_LOADMAP_VERSION
++#endif
++
+ /*
+  * binfmt binary parameters structure
+  */
  struct elf_fdpic_params {
  	struct elfhdr			hdr;		/* ref copy of ELF header */
  	struct elf_phdr			*phdrs;		/* ref copy of PT_PHDR table */
@@ -186,39 +230,31 @@ diff -Naur linux-5.19.org/include/linux/elf-fdpic.h linux-5.19/include/linux/elf
  	unsigned long			ph_addr;	/* mapped PT_PHDR user address */
  	unsigned long			map_addr;	/* mapped loadmap user address */
 diff -Naur linux-5.19.org/include/uapi/linux/elf-fdpic.h linux-5.19/include/uapi/linux/elf-fdpic.h
---- linux-5.19.org/include/uapi/linux/elf-fdpic.h	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/include/uapi/linux/elf-fdpic.h	2022-10-13 08:45:42.216070536 +1000
-@@ -18,18 +18,18 @@
- #define PT_GNU_STACK    (PT_LOOS + 0x474e551)
+--- linux-5.19.org/include/uapi/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/include/uapi/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
+@@ -32,4 +32,19 @@
  
- /* segment mappings for ELF FDPIC libraries/executables/interpreters */
--struct elf32_fdpic_loadseg {
--	Elf32_Addr	addr;		/* core address to which mapped */
--	Elf32_Addr	p_vaddr;	/* VMA recorded in file */
--	Elf32_Word	p_memsz;	/* allocation size recorded in file */
-+struct elf_fdpic_loadseg {
-+	Elf_Addr	addr;		/* core address to which mapped */
-+	Elf_Addr	p_vaddr;	/* VMA recorded in file */
-+	Elf_Word	p_memsz;	/* allocation size recorded in file */
- };
+ #define ELF32_FDPIC_LOADMAP_VERSION	0x0000
  
--struct elf32_fdpic_loadmap {
--	Elf32_Half	version;	/* version of these structures, just in case... */
--	Elf32_Half	nsegs;		/* number of segments */
--	struct elf32_fdpic_loadseg segs[];
-+struct elf_fdpic_loadmap {
-+	Elf_Half	version;	/* version of these structures, just in case... */
-+	Elf_Half	nsegs;		/* number of segments */
-+	struct elf_fdpic_loadseg segs[];
- };
- 
--#define ELF32_FDPIC_LOADMAP_VERSION	0x0000
-+#define ELF_FDPIC_LOADMAP_VERSION	0x0000
- 
++/* segment mappings for ELF FDPIC libraries/executables/interpreters */
++struct elf64_fdpic_loadseg {
++	Elf64_Addr	addr;		/* core address to which mapped */
++	Elf64_Addr	p_vaddr;	/* VMA recorded in file */
++	Elf64_Word	p_memsz;	/* allocation size recorded in file */
++};
++
++struct elf64_fdpic_loadmap {
++	Elf64_Half	version;	/* version of these structures, just in case... */
++	Elf64_Half	nsegs;		/* number of segments */
++	struct elf64_fdpic_loadseg segs[];
++};
++
++#define ELF64_FDPIC_LOADMAP_VERSION	0x0000
++
  #endif /* _UAPI_LINUX_ELF_FDPIC_H */
 diff -Naur linux-5.19.org/include/uapi/linux/ptrace.h linux-5.19/include/uapi/linux/ptrace.h
---- linux-5.19.org/include/uapi/linux/ptrace.h	2022-10-03 07:09:07.000000000 +1000
-+++ linux-5.19/include/uapi/linux/ptrace.h	2022-10-13 08:45:42.216070536 +1000
+--- linux-5.19.org/include/uapi/linux/ptrace.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-5.19/include/uapi/linux/ptrace.h	2023-01-16 10:37:14.453238468 +1000
 @@ -24,6 +24,12 @@
  
  #define PTRACE_SYSCALL		  24
