@@ -1,0 +1,21 @@
+--- elf2flt-2019.12/elf2flt.c.orig	2023-01-19 23:49:12.132143099 +1000
++++ elf2flt-2019.12/elf2flt.c	2023-01-19 23:54:44.534413886 +1000
+@@ -149,6 +149,18 @@
+ #define O_BINARY 0
+ #endif
+ 
++/*
++ * More modern versions of the bfd includes and library have changed
++ * what some of the API does in very incompatible ways. Define away
++ * those differences here so we can work with older binutils/bfd or
++ * newer.
++ */
++#ifndef bfd_section_vma
++#define bfd_section_vma(bfd, ptr) ((ptr)->vma)
++#endif
++#ifndef bfd_section_size
++#define bfd_section_size(bfd, ptr) ((ptr)->size)
++#endif
+ 
+ /* Extra output when running.  */
+ static int verbose = 0;
