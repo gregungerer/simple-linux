@@ -136,10 +136,6 @@ build_uclibc()
 	make oldconfig CROSS=${TARGET}- ARCH=${CPU} < /dev/null
 	make -j install CROSS=${TARGET}- ARCH=${CPU} || exit 1
 
-	#ln -f ${TOOLCHAIN}/${TARGET}/lib/crt1.o ${TOOLCHAIN}/${TARGET}/lib/Scrt1.o
-	#echo | ${TARGET}-gcc -o ${TOOLCHAIN}/${TARGET}/lib/crti.o -c
-	#ln -f ${TOOLCHAIN}/${TARGET}/lib/crti.o ${TOOLCHAIN}/${TARGET}/lib/crtn.o
-
 	cd ../
 }
 
