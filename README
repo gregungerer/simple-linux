@@ -26,7 +26,7 @@ The resulting kernel can be run using QEMU.
 
 
 
-m68k-nommu
+M68K nommu
 ----------
 
 The traditional m68knommu build uses flat format executables. So the
@@ -48,7 +48,27 @@ It can be run with same QEMU command line as above.
 
 
 
-arm-nommu
+ARM
+---
+
+QEMU has a nice ARM/versatile board emulation that is ideal for testing
+simple ARM systems. 
+
+    ./build-arm-linux-musl-elf.sh
+
+and then run the resulting system:
+
+    qemu-system-arm -M versatilepb -nographic -kernel linux-6.0/arch/arm/boot/zImage -dtb linux-6.0/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
+
+There is also a uclibc based ARM build:
+
+    ./build-arm-linux-uclibc-elf.sh
+
+Run with the same qemu command line above.
+
+
+
+ARM nommu
 ---------
 
 QEMU has a nice ARM/versatile board emulation that is ideal for testing
