@@ -148,7 +148,7 @@ build_busybox()
 
 build_finalize_rootfs()
 {
-	echo "BUILD- finalizing rootfs"
+	echo "BUILD: finalizing rootfs"
 
 	mkdir -p ${ROOTFS}/etc
 	mkdir -p ${ROOTFS}/lib
