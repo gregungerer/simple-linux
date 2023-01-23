@@ -111,12 +111,13 @@ RISC-V nommu
 ------------
 
 There is now an experimental RISC-V nommu build that supports ELF format
-binaries. Note this is not ELF-FDPIC, but rather PIE style ELF binaries.
+binaries. Note this is not ELF-FDPIC, but rather PIE style ELF binaries -
+but it does use the linux kernels ELF-FDPIC program loader.
 To build that:
 
     ./build-riscvnommu-linux-uclibc-elf.sh
 
 and then run the resulting system:
 
-    qemu-system-riscv64 -cpu rv64,mmu=false -nographic -machine virt -bios linux-5.19/arch/riscv/boot/Image
+    qemu-system-riscv64 -cpu rv64,mmu=false -nographic -machine virt -bios linux-6.1/arch/riscv/boot/Image
 

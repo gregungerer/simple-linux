@@ -20,7 +20,7 @@
 #		-cpu rv64,mmu=false \
 #		-nographic \
 #		-machine virt \
-#		-bios linux-5.19/arch/riscv/boot/Image
+#		-bios linux-6.1/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -33,14 +33,14 @@ GCC_VERSION=12.2.0
 UCLIBC_NG_VERSION=1.0.42
 ULDSO_VERSION=1.0.0
 BUSYBOX_VERSION=1.35.0
-LINUX_VERSION=5.19
+LINUX_VERSION=6.1
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_NG_URL=http://downloads.uclibc-ng.org/releases/${UCLIBC_NG_VERSION}/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
 ULDSO_URL=https://github.com/gregungerer/uldso/archive/refs/tags/v${ULDSO_VERSION}.tar.gz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
-LINUX_URL=https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz
+LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 
 ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain

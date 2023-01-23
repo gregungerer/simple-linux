@@ -1,5 +1,5 @@
 From 6532df71b9dab999c054f30557eff4c50ff3d387 Mon Sep 17 00:00:00 2001
-From: Greg Ungerer <gerg@linux-m68k.org>
+From: Greg Ungerer <gerg@kernel.org>
 Date: Tue, 26 Apr 2022 12:11:41 +1000
 Subject: [PATCH] riscv: add support for ELF-FDPIC to RISC-V
  architecture
@@ -23,9 +23,9 @@ Signed-off-by: Greg Ungerer <gerg@kernel.org>
  include/uapi/linux/ptrace.h    |    6 ++++++
  7 files changed, 68 insertions(+), 22 deletions(-)
 
-diff -Naur linux-5.19.org/arch/riscv/include/asm/elf.h linux-5.19/arch/riscv/include/asm/elf.h
---- linux-5.19.org/arch/riscv/include/asm/elf.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/arch/riscv/include/asm/elf.h	2023-01-16 10:37:14.453238468 +1000
+diff -Naur linux-6.1.org/arch/riscv/include/asm/elf.h linux-6.1/arch/riscv/include/asm/elf.h
+--- linux-6.1.org/arch/riscv/include/asm/elf.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/arch/riscv/include/asm/elf.h	2023-01-16 10:37:14.453238468 +1000
 @@ -40,6 +40,7 @@
  #define compat_elf_check_arch	compat_elf_check_arch
  
@@ -56,19 +56,19 @@ diff -Naur linux-5.19.org/arch/riscv/include/asm/elf.h linux-5.19/arch/riscv/inc
  #define ARCH_DLINFO						\
  do {								\
  	/*							\
-@@ -100,6 +107,8 @@
- 	NEW_AUX_ENT(AT_L2_CACHEGEOMETRY,			\
- 		get_cache_geometry(2, CACHE_TYPE_UNIFIED));	\
+@@ -104,6 +111,8 @@
+ 	NEW_AUX_ENT(AT_L3_CACHEGEOMETRY,			\
+ 		get_cache_geometry(3, CACHE_TYPE_UNIFIED));	\
  } while (0)
 +
 +#ifdef CONFIG_MMU
  #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
  struct linux_binprm;
  extern int arch_setup_additional_pages(struct linux_binprm *bprm,
-diff -Naur linux-5.19.org/arch/riscv/include/asm/mmu.h linux-5.19/arch/riscv/include/asm/mmu.h
---- linux-5.19.org/arch/riscv/include/asm/mmu.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/arch/riscv/include/asm/mmu.h	2023-01-16 10:37:14.453238468 +1000
-@@ -21,6 +21,10 @@
+diff -Naur linux-6.1.org/arch/riscv/include/asm/mmu.h linux-6.1/arch/riscv/include/asm/mmu.h
+--- linux-6.1.org/arch/riscv/include/asm/mmu.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/arch/riscv/include/asm/mmu.h	2023-01-16 10:37:14.453238468 +1000
+@@ -20,6 +20,10 @@
  	/* A local icache flush is needed before user execution can resume. */
  	cpumask_t icache_stale_mask;
  #endif
@@ -79,9 +79,9 @@ diff -Naur linux-5.19.org/arch/riscv/include/asm/mmu.h linux-5.19/arch/riscv/inc
  } mm_context_t;
  
  void __init create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa,
-diff -Naur linux-5.19.org/fs/binfmt_elf_fdpic.c linux-5.19/fs/binfmt_elf_fdpic.c
---- linux-5.19.org/fs/binfmt_elf_fdpic.c	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/fs/binfmt_elf_fdpic.c	2023-01-16 10:36:49.509114322 +1000
+diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
+--- linux-6.1.org/fs/binfmt_elf_fdpic.c	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/fs/binfmt_elf_fdpic.c	2023-01-16 10:36:49.509114322 +1000
 @@ -138,7 +138,7 @@
  static int elf_fdpic_fetch_phdrs(struct elf_fdpic_params *params,
  				 struct file *file)
@@ -187,21 +187,21 @@ diff -Naur linux-5.19.org/fs/binfmt_elf_fdpic.c linux-5.19/fs/binfmt_elf_fdpic.c
  	unsigned long load_addr, delta_vaddr;
  	int loop, dvset;
  
-diff -Naur linux-5.19.org/fs/Kconfig.binfmt linux-5.19/fs/Kconfig.binfmt
---- linux-5.19.org/fs/Kconfig.binfmt	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/fs/Kconfig.binfmt	2023-01-16 10:38:19.749564885 +1000
+diff -Naur linux-6.1.org/fs/Kconfig.binfmt linux-6.1/fs/Kconfig.binfmt
+--- linux-6.1.org/fs/Kconfig.binfmt	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/fs/Kconfig.binfmt	2023-01-16 10:38:19.749564885 +1000
 @@ -58,7 +58,7 @@
  config BINFMT_ELF_FDPIC
  	bool "Kernel support for FDPIC ELF binaries"
  	default y if !BINFMT_ELF
--	depends on ARM || ((M68K || SUPERH) && !MMU)
-+	depends on ARM || ((M68K || RISCV || SUPERH) && !MMU)
+-	depends on ARM || ((M68K || SUPERH || XTENSA) && !MMU)
++	depends on ARM || ((M68K || RISCV || SUPERH || XTENSA) && !MMU)
  	select ELFCORE
  	help
  	  ELF FDPIC binaries are based on ELF, but allow the individual load
-diff -Naur linux-5.19.org/include/linux/elf-fdpic.h linux-5.19/include/linux/elf-fdpic.h
---- linux-5.19.org/include/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/include/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
+diff -Naur linux-6.1.org/include/linux/elf-fdpic.h linux-6.1/include/linux/elf-fdpic.h
+--- linux-6.1.org/include/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/include/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
 @@ -10,13 +10,25 @@
  
  #include <uapi/linux/elf-fdpic.h>
@@ -229,9 +229,9 @@ diff -Naur linux-5.19.org/include/linux/elf-fdpic.h linux-5.19/include/linux/elf
  	unsigned long			elfhdr_addr;	/* mapped ELF header user address */
  	unsigned long			ph_addr;	/* mapped PT_PHDR user address */
  	unsigned long			map_addr;	/* mapped loadmap user address */
-diff -Naur linux-5.19.org/include/uapi/linux/elf-fdpic.h linux-5.19/include/uapi/linux/elf-fdpic.h
---- linux-5.19.org/include/uapi/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/include/uapi/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
+diff -Naur linux-6.1.org/include/uapi/linux/elf-fdpic.h linux-6.1/include/uapi/linux/elf-fdpic.h
+--- linux-6.1.org/include/uapi/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/include/uapi/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
 @@ -32,4 +32,19 @@
  
  #define ELF32_FDPIC_LOADMAP_VERSION	0x0000
@@ -252,9 +252,9 @@ diff -Naur linux-5.19.org/include/uapi/linux/elf-fdpic.h linux-5.19/include/uapi
 +#define ELF64_FDPIC_LOADMAP_VERSION	0x0000
 +
  #endif /* _UAPI_LINUX_ELF_FDPIC_H */
-diff -Naur linux-5.19.org/include/uapi/linux/ptrace.h linux-5.19/include/uapi/linux/ptrace.h
---- linux-5.19.org/include/uapi/linux/ptrace.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-5.19/include/uapi/linux/ptrace.h	2023-01-16 10:37:14.453238468 +1000
+diff -Naur linux-6.1.org/include/uapi/linux/ptrace.h linux-6.1/include/uapi/linux/ptrace.h
+--- linux-6.1.org/include/uapi/linux/ptrace.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.1/include/uapi/linux/ptrace.h	2023-01-16 10:37:14.453238468 +1000
 @@ -24,6 +24,12 @@
  
  #define PTRACE_SYSCALL		  24
