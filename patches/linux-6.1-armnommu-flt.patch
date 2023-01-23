@@ -60,7 +60,7 @@ diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
 index 87badeae3181..f9e46fdcdbeb 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -304,8 +304,13 @@ config MMU
+@@ -305,12 +305,30 @@ config MMU
  	  Select if you want MMU-based virtualised addressing space
  	  support by paged memory management. If unsure, say 'Y'.
  
@@ -73,11 +73,8 @@ index 87badeae3181..f9e46fdcdbeb 100644
 -	def_bool !MMU
 +	bool "ARMv7-M based platforms (Cortex-M0/M3/M4)"
  	select ARM_NVIC
- 	select AUTO_ZRELADDR
- 	select TIMER_OF
-@@ -315,6 +320,19 @@ config ARM_SINGLE_ARMV7M
- 	select SPARSE_IRQ
- 	select USE_OF
+ 	select CPU_V7M
+ 	select NO_IOPORT_MAP
  
 +config ARM_SINGLE_ARMV5
 +	bool "ARMv5 based platforms"
@@ -95,20 +92,6 @@ index 87badeae3181..f9e46fdcdbeb 100644
  config ARCH_MMAP_RND_BITS_MIN
  	default 8
  
-diff --git a/arch/arm/Kconfig.debug b/arch/arm/Kconfig.debug
-index 792796a348c3..0743c15db2f4 100644
---- a/arch/arm/Kconfig.debug
-+++ b/arch/arm/Kconfig.debug
-@@ -1922,7 +1922,8 @@ config DEBUG_UNCOMPRESS
- config UNCOMPRESS_INCLUDE
- 	string
- 	default "debug/uncompress.h" if ARCH_MULTIPLATFORM || ARCH_MSM || \
--					PLAT_SAMSUNG || ARM_SINGLE_ARMV7M
-+					PLAT_SAMSUNG || ARM_SINGLE_ARMV7M || \
-+					ARCH_VERSATILE
- 	default "mach/uncompress.h"
- 
- config EARLY_PRINTK
 diff --git a/arch/arm/mach-versatile/Kconfig b/arch/arm/mach-versatile/Kconfig
 index 2ef226194c3a..1e54c6962fde 100644
 --- a/arch/arm/mach-versatile/Kconfig
