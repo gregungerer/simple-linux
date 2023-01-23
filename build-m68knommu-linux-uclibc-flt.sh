@@ -43,6 +43,7 @@ ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
 ROOTFS=${ROOTDIR}/rootfs
 
+NCPU=32
 PATH=${TOOLCHAIN}/bin:${PATH}
 
 fetch_file()
@@ -67,7 +68,7 @@ build_binutils()
 	tar xvjf downloads/binutils-${BINUTILS_VERSION}.tar.bz2
 	cd binutils-${BINUTILS_VERSION}
 	./configure --target=${TARGET} --prefix=${TOOLCHAIN}
-	make || exit 1
+	make -j${NCPU} || exit 1
 	make install || exit 1
 	cd ../
 }
@@ -97,7 +98,7 @@ build_gcc()
 		--without-headers \
 		--with-system-zlib \
 		--enable-languages=c
-	make -j || exit 1
+	make -j${NCPU} || exit 1
 	make install || exit 1
 	cd ../..
 }
@@ -130,7 +131,7 @@ build_uClibc()
 	sed -i "s/^DEVEL_PREFIX=.*\$/DEVEL_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
 
 	make oldconfig CROSS=${TARGET}- TARGET_ARCH=${CPU} < /dev/null
-	make -j install CROSS=${TARGET}- TARGET_ARCH=${CPU} || exit 1
+	make -j${NCPU} install CROSS=${TARGET}- TARGET_ARCH=${CPU} || exit 1
 	cd ../
 }
 
@@ -162,7 +163,7 @@ build_busybox()
 	cp configs/busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
 	cd busybox-${BUSYBOX_VERSION}
 	make oldconfig
-	make -j CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
+	make -j${NCPU} CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
 	cd ../
 }
 
@@ -198,7 +199,7 @@ build_linux()
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- olddefconfig < /dev/null
-	make -j ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
+	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
 
 	cd ../
 }
