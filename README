@@ -81,7 +81,7 @@ build:
 
 and then run the resulting system:
 
-    qemu-system-arm -M versatilepb -nographic -kernel linux-6.0/arch/arm/boot/zImage -dtb linux-6.0/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
+    qemu-system-arm -M versatilepb -nographic -kernel linux-6.1/arch/arm/boot/zImage -dtb linux-6.1/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
 
 
 
