@@ -21,7 +21,7 @@ Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
 diff --git a/libc/sysdeps/linux/m68k/crt1.S b/libc/sysdeps/linux/m68k/crt1.S
 --- uClibc/libc/sysdeps/linux/m68k/crt1.S.org	2022-04-24 10:21:31.336553342 +1000
 +++ uClibc/libc/sysdeps/linux/m68k/crt1.S	2022-04-26 01:27:51.799747075 +1000
-@@ -79,9 +79,13 @@
+@@ -78,9 +78,13 @@
  	sub.l %fp, %fp
  
  #if !defined __ARCH_USE_MMU__ && defined __PIC__
@@ -35,7 +35,7 @@ diff --git a/libc/sysdeps/linux/m68k/crt1.S b/libc/sysdeps/linux/m68k/crt1.S
  	.equ have_current_got, 1
  #endif
  	
-@@ -93,11 +97,11 @@
+@@ -92,11 +96,11 @@
  	   arguments for `main': argc, argv.  envp will be determined
  	   later in __libc_start_main.  */
  	move.l (%sp)+, %d0	/* Pop the argument count.  */

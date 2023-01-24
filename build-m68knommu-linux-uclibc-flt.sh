@@ -14,7 +14,7 @@
 # only the busybox package to provide a very basic user space.
 #
 # The build starts by building binutils and a first pass minimal gcc,
-# then builds uClibc, busybox and finally a kernel. The resulting kernel
+# then builds uClibc-ng, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
 #  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.1/vmlinux
@@ -28,13 +28,13 @@ BOARD=m5208evb
 BINUTILS_VERSION=2.25.1
 GCC_VERSION=8.3.0
 ELF2FLT_VERSION=2019.12
-UCLIBC_VERSION=0.9.33.2
+UCLIBC_NG_VERSION=1.0.42
 LINUX_VERSION=6.1
 BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
-UCLIBC_URL=https://www.uclibc.org/downloads/uClibc-${UCLIBC_VERSION}.tar.xz
+UCLIBC_NG_URL=https://www.uclibc.org/downloads/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
 ELF2FLT_URL=https://github.com/uclinux-dev/elf2flt/archive/refs/tags/v${ELF2FLT_VERSION}.tar.gz
@@ -118,12 +118,12 @@ build_linux_headers()
 
 build_uClibc()
 {
-	echo "BUILD: building uClibc-${UCLIBC_VERSION}"
-	fetch_file ${UCLIBC_URL}
+	echo "BUILD: building uClibc-ng-${UCLIBC_NG_VERSION}"
+	fetch_file ${UCLIBC_NG_URL}
 
-	tar xvJf downloads/uClibc-${UCLIBC_VERSION}.tar.xz
-	cp configs/uClibc-${UCLIBC_VERSION}-${FLAVOR}.config uClibc-${UCLIBC_VERSION}/.config
-	cd uClibc-${UCLIBC_VERSION}
+	tar xvJf downloads/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
+	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
+	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
@@ -218,7 +218,7 @@ then
 	rm -rf binutils-${BINUTILS_VERSION}
 	rm -rf gcc-${GCC_VERSION}
 	rm -rf linux-${LINUX_VERSION}
-	rm -rf uClibc-${UCLIBC_VERSION}
+	rm -rf uClibc-ng-${UCLIBC_NG_VERSION}
 	rm -rf elf2flt-${ELF2FLT_VERSION}
 	rm -rf busybox-${BUSYBOX_VERSION}
 	rm -rf ${TOOLCHAIN}
