@@ -25,14 +25,14 @@ TARGET=m68k-uclinux
 FLAVOR=m68knommu-flt
 BOARD=m5208evb
 
-BINUTILS_VERSION=2.25.1
-GCC_VERSION=8.3.0
+BINUTILS_VERSION=2.39
+GCC_VERSION=12.2.0
 ELF2FLT_VERSION=2019.12
 UCLIBC_NG_VERSION=1.0.42
 LINUX_VERSION=6.1
 BUSYBOX_VERSION=1.35.0
 
-BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2
+BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_NG_URL=https://www.uclibc.org/downloads/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
@@ -65,7 +65,7 @@ build_binutils()
 	echo "BUILD: building binutils-${BINUTILS_VERSION}"
 	fetch_file ${BINUTILS_URL}
 
-	tar xvjf downloads/binutils-${BINUTILS_VERSION}.tar.bz2
+	tar xvJf downloads/binutils-${BINUTILS_VERSION}.tar.xz
 	cd binutils-${BINUTILS_VERSION}
 	./configure --target=${TARGET} --prefix=${TOOLCHAIN}
 	make -j${NCPU} || exit 1
@@ -142,6 +142,9 @@ build_elf2flt()
 
 	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
 	cd elf2flt-${ELF2FLT_VERSION}
+
+	patch -p1 < ../patches/elf2flt-bfd-section-fixes.patch
+
 	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
 		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
 		--with-bfd-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd \
