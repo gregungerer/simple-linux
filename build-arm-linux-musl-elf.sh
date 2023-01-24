@@ -137,8 +137,9 @@ build_busybox()
 	fetch_file ${BUSYBOX_URL}
 
 	tar xvjf downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
-	cp configs/busybox-${BUSYBOX_VERSION}-${FLAVOR}.config busybox-${BUSYBOX_VERSION}/.config
+	cp configs/busybox-${BUSYBOX_VERSION}.config busybox-${BUSYBOX_VERSION}/.config
 	cd busybox-${BUSYBOX_VERSION}
+
 	make oldconfig
 	make -j${NCPU} CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
 	cd ../
