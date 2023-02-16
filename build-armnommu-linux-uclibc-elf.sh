@@ -1,7 +1,7 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 #
-# build-armnommu-linux-uclibc-flt.sh -- build really simple linux for armnommu
+# build-armnommu-linux-uclibc-elf.sh -- build really simple linux for armnommu
 #
 # (C) Copyright 2022-2023, Greg Ungerer (gerg@kernel.org)
 #
@@ -24,22 +24,22 @@
 #
 
 CPU=arm
-TARGET=arm-uclinuxeabi
-FLAVOR=armnommu-flt
+TARGET=arm-linux-uclibceabi
+FLAVOR=armnommu-elf
 BOARD=versatile
 
 BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
-ELF2FLT_VERSION=2021.08
 UCLIBC_NG_VERSION=1.0.42
+ULDSO_VERSION=1.0.0
 LINUX_VERSION=6.1
 BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_NG_URL=http://downloads.uclibc-ng.org/releases/${UCLIBC_NG_VERSION}/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
+ULDSO_URL=https://github.com/gregungerer/uldso/archive/refs/tags/v${ULDSO_VERSION}.tar.gz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
-ELF2FLT_URL=https://github.com/uclinux-dev/elf2flt/archive/refs/tags/v${ELF2FLT_VERSION}.tar.gz
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 
 ROOTDIR=$(pwd)
@@ -128,6 +128,8 @@ build_uClibc()
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
+	#patch -p1 < ../uClibc-ng-1.0.42-armnommu-elf.patch
+
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
 	sed -i "s/^RUNTIME_PREFIX=.*\$/RUNTIME_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
@@ -135,28 +137,21 @@ build_uClibc()
 
 	make oldconfig CROSS=${TARGET}- TARGET_ARCH=${CPU} < /dev/null
 	make -j${NCPU} install CROSS=${TARGET}- TARGET_ARCH=${CPU} || exit 1
+
+	ln -f ${TOOLCHAIN}/${TARGET}/lib/crt1.o ${TOOLCHAIN}/${TARGET}/lib/Scrt1.o
 	cd ../
 }
 
-build_elf2flt()
+build_uldso()
 {
-	echo "BUILD: building elf2flt-${ELF2FLT_VERSION}"
-	fetch_file ${ELF2FLT_URL}
+	echo "BUILD: building uldso-${ULDSO_VERSION}"
+	fetch_file ${ULDSO_URL}
 
-	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
-	cd elf2flt-${ELF2FLT_VERSION}
-
-	patch -p1 < ../patches/elf2flt-bfd-section-fixes.patch
-
-	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
-		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
-		--with-bfd-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd \
-		--with-binutils-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/include \
-		--disable-werror \
-		--prefix=${TOOLCHAIN} \
-		--target=${TARGET}
-	make || exit 1
-	make install || exit 1
+	tar xvzf downloads/v${ULDSO_VERSION}.tar.gz
+	cd uldso-${ULDSO_VERSION}
+	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- EXTRA_CFLAGS="-I${TOOLCHAIN}/${TARGET}/include"
+	mkdir -p ${ROOTFS}/lib
+	cp uld.so.1 ${ROOTFS}/lib/ld-uClibc.so.0
 	cd ../
 }
 
@@ -170,6 +165,8 @@ build_busybox()
 	cd busybox-${BUSYBOX_VERSION}
 
 	sed -i 's/# CONFIG_NOMMU is not set/CONFIG_NOMMU=y/' .config
+	sed -i 's/# CONFIG_PIE is not set/CONFIG_PIE=y/' .config
+	sed -i 's/CONFIG_EXTRA_CFLAGS=""/CONFIG_EXTRA_CFLAGS="-fPIC"/' .config
 
 	make oldconfig
 	make -j${NCPU} CROSS_COMPILE=${TARGET}- CONFIG_PREFIX=${ROOTFS} install SKIP_STRIP=y
@@ -204,6 +201,8 @@ build_linux()
 	cp ../configs/linux-${LINUX_VERSION}-armnommu-${BOARD}.config .config
 
 	patch -p1 < ../patches/linux-${LINUX_VERSION}-armnommu-${BOARD}.patch
+	patch -p1 < ../patches/linux-${LINUX_VERSION}-armnommu-fix-thread-registers.patch
+	patch -p1 < ../patches/linux-${LINUX_VERSION}-armnommu-fix-elf-fdpic-personality.patch
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- oldconfig
 	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
@@ -222,7 +221,7 @@ then
 	rm -rf gcc-${GCC_VERSION}
 	rm -rf linux-${LINUX_VERSION}
 	rm -rf uClibc-ng-${UCLIBC_NG_VERSION}
-	rm -rf elf2flt-${ELF2FLT_VERSION}
+	rm -rf uldso-${ULDSO_VERSION}
 	rm -rf busybox-${BUSYBOX_VERSION}
 	rm -rf ${TOOLCHAIN}
 	rm -rf ${ROOTFS}
@@ -238,7 +237,7 @@ build_binutils
 build_gcc
 build_linux_headers
 build_uClibc
-build_elf2flt
+build_uldso
 build_busybox
 build_finalize_rootfs
 build_linux

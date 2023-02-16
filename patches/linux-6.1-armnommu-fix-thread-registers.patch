@@ -1,0 +1,12 @@
+--- linux-6.1/arch/arm/include/asm/processor.h	2023-01-25 10:19:42.778134983 +1000
++++ /tmp/processor.h	2023-01-25 10:19:39.774112655 +1000
+@@ -60,7 +60,8 @@
+ 	}								\
+ 	memset(regs->uregs, 0, sizeof(regs->uregs));			\
+ 	if (IS_ENABLED(CONFIG_BINFMT_ELF_FDPIC) &&			\
+-	    current->personality & FDPIC_FUNCPTRS) {			\
++	    ((! IS_ENABLED(CONFIG_MMU)) ||				\
++	     current->personality & FDPIC_FUNCPTRS)) {			\
+ 		regs->ARM_r7 = r7;					\
+ 		regs->ARM_r8 = r8;					\
+ 		regs->ARM_r9 = r9;					\
