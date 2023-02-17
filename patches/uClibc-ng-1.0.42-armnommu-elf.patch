@@ -1,0 +1,11 @@
+--- uClibc-ng-1.0.42/libc/sysdeps/linux/arm/crt1.S.org	2023-01-26 00:33:56.187322935 +1000
++++ uClibc-ng-1.0.42/libc/sysdeps/linux/arm/crt1.S	2023-01-26 00:34:10.883426967 +1000
+@@ -245,7 +245,7 @@
+ 	mov fp, #0
+ 	mov lr, #0
+ 
+-#ifdef __ARCH_USE_MMU__
++#if defined(__ARCH_USE_MMU__) || defined(FDPIC_LOADER)
+ #ifdef L_rcrt1
+ 	/* We don't need to save a1 since no dynamic linker should have run */
+ 	ldr a1, .L_GOT          /* Get value at .L_GOT + 0  (offset to GOT)*/

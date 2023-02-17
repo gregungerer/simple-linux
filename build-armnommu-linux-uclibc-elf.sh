@@ -128,7 +128,7 @@ build_uClibc()
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
-	#patch -p1 < ../uClibc-ng-1.0.42-armnommu-elf.patch
+	patch -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.patch
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
