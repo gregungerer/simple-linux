@@ -204,7 +204,12 @@ build_linux()
 	echo "BUILD: building linux-${LINUX_VERSION}"
 
 	cd linux-${LINUX_VERSION}
-	cp ../configs/linux-${LINUX_VERSION}-${FLAVOR}.config .config
+
+	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- nommu_virt_defconfig
+
+	echo "CONFIG_BINFMT_ELF_FDPIC=y" >> .config
+	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
+        echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- oldconfig < /dev/null
 	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
