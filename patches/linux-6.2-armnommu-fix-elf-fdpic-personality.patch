@@ -1,5 +1,5 @@
---- linux-6.1/fs/binfmt_elf_fdpic.c.org	2023-02-16 00:02:48.836345419 +1000
-+++ linux-6.1/fs/binfmt_elf_fdpic.c	2023-02-15 23:57:45.146253994 +1000
+--- a/fs/binfmt_elf_fdpic.c	2023-02-16 00:02:48.836345419 +1000
++++ b/fs/binfmt_elf_fdpic.c	2023-02-15 23:57:45.146253994 +1000
 @@ -348,7 +348,7 @@
  	if (elf_check_fdpic(&exec_params.hdr))
  		set_personality(PER_LINUX_FDPIC);

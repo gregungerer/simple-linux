@@ -18,8 +18,8 @@
 #
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
-#		-kernel linux-6.1/arch/arm/boot/zImage \
-#		-dtb linux-6.1/arch/arm/boot/dts/versatile-pb.dtb \
+#		-kernel linux-6.2/arch/arm/boot/zImage \
+#		-dtb linux-6.2/arch/arm/boot/dts/versatile-pb.dtb \
 #		-append "console=ttyAMA0,115200"
 #
 
@@ -32,7 +32,7 @@ BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
 ELF2FLT_VERSION=2021.08
 UCLIBC_NG_VERSION=1.0.42
-LINUX_VERSION=6.1
+LINUX_VERSION=6.2
 BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz

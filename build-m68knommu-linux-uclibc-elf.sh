@@ -16,7 +16,7 @@
 # then builds uClibc-ng, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.1/vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.2/vmlinux
 #
 
 CPU=m68k
@@ -29,7 +29,7 @@ GCC_VERSION=12.2.0
 UCLIBC_NG_VERSION=1.0.42
 BUSYBOX_VERSION=1.35.0
 ULDSO_VERSION=1.0.1
-LINUX_VERSION=6.1
+LINUX_VERSION=6.2
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

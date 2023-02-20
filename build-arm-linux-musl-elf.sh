@@ -18,8 +18,8 @@
 #
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
-#		-kernel linux-6.1/arch/arm/boot/zImage \
-#		-dtb linux-6.1/arch/arm/boot/dts/versatile-pb.dtb \
+#		-kernel linux-6.2/arch/arm/boot/zImage \
+#		-dtb linux-6.2/arch/arm/boot/dts/versatile-pb.dtb \
 #		-append "console=ttyAMA0,115200"
 #
 
@@ -31,7 +31,7 @@ BOARD=versatile
 BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
 MUSL_VERSION=1.2.3
-LINUX_VERSION=6.1
+LINUX_VERSION=6.2
 BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
@@ -155,7 +155,7 @@ build_finalize_rootfs()
 	mkdir -p ${ROOTFS}/sys
 
 	cp musl-${MUSL_VERSION}/lib/libc.so ${ROOTFS}/lib/
-        ln -s /lib/libc.so ${ROOTFS}/lib/ld-musl-arm.so.1
+        ln -sf /lib/libc.so ${ROOTFS}/lib/ld-musl-arm.so.1
 
 	echo "::sysinit:/etc/rc" > ${ROOTFS}/etc/inittab
 	echo "::respawn:/bin/sh" >> ${ROOTFS}/etc/inittab
@@ -166,7 +166,7 @@ build_finalize_rootfs()
 	echo "echo -e \"\\nSimple Linux\\n\\n\"" >> ${ROOTFS}/etc/rc
 	chmod 755 ${ROOTFS}/etc/rc
 
-	ln -s /sbin/init ${ROOTFS}/init
+	ln -sf /sbin/init ${ROOTFS}/init
 }
 
 build_linux()

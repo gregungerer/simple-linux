@@ -17,7 +17,7 @@
 # then builds uClibc-ng, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.1/vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.2/vmlinux
 #
 
 CPU=m68k
@@ -29,7 +29,7 @@ BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
 ELF2FLT_VERSION=2019.12
 UCLIBC_NG_VERSION=1.0.42
-LINUX_VERSION=6.1
+LINUX_VERSION=6.2
 BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
@@ -191,7 +191,7 @@ build_finalize_rootfs()
 	echo "echo -e \"\\nSimple Linux\\n\\n\"" >> ${ROOTFS}/etc/rc
 	chmod 755 ${ROOTFS}/etc/rc
 
-	ln -s /sbin/init ${ROOTFS}/init
+	ln -sf /sbin/init ${ROOTFS}/init
 }
 
 build_linux()

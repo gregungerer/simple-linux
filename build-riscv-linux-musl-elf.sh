@@ -20,7 +20,7 @@
 #		-nographic \
 #		-machine virt \
 #		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
-#		-kernel linux-6.1/arch/riscv/boot/Image \
+#		-kernel linux-6.2/arch/riscv/boot/Image \
 #		-append "console=ttyS0"
 #
 
@@ -32,7 +32,7 @@ BOARD=qemu
 BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
 MUSL_VERSION=1.2.3
-LINUX_VERSION=6.1
+LINUX_VERSION=6.2
 BUSYBOX_VERSION=1.35.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
@@ -157,7 +157,7 @@ build_finalize_rootfs()
 	mkdir -p ${ROOTFS}/sys
 
 	cp musl-${MUSL_VERSION}/lib/libc.so ${ROOTFS}/lib/
-	ln -s /lib/libc.so ${ROOTFS}/lib/ld-linux-riscv64-lp64d.so.1
+	ln -sf /lib/libc.so ${ROOTFS}/lib/ld-linux-riscv64-lp64d.so.1
 
 	echo "::sysinit:/etc/rc" > ${ROOTFS}/etc/inittab
 	echo "::respawn:/bin/sh" >> ${ROOTFS}/etc/inittab

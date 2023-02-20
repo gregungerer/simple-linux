@@ -23,9 +23,9 @@ Signed-off-by: Greg Ungerer <gerg@kernel.org>
  include/uapi/linux/ptrace.h    |    6 ++++++
  7 files changed, 68 insertions(+), 22 deletions(-)
 
-diff -Naur linux-6.1.org/arch/riscv/include/asm/elf.h linux-6.1/arch/riscv/include/asm/elf.h
---- linux-6.1.org/arch/riscv/include/asm/elf.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/arch/riscv/include/asm/elf.h	2023-01-16 10:37:14.453238468 +1000
+diff -Naur linux-6.2.org/arch/riscv/include/asm/elf.h linux-6.2/arch/riscv/include/asm/elf.h
+--- linux-6.2.org/arch/riscv/include/asm/elf.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/arch/riscv/include/asm/elf.h	2023-01-16 10:37:14.453238468 +1000
 @@ -40,6 +40,7 @@
  #define compat_elf_check_arch	compat_elf_check_arch
  
@@ -65,12 +65,12 @@ diff -Naur linux-6.1.org/arch/riscv/include/asm/elf.h linux-6.1/arch/riscv/inclu
  #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
  struct linux_binprm;
  extern int arch_setup_additional_pages(struct linux_binprm *bprm,
-diff -Naur linux-6.1.org/arch/riscv/include/asm/mmu.h linux-6.1/arch/riscv/include/asm/mmu.h
---- linux-6.1.org/arch/riscv/include/asm/mmu.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/arch/riscv/include/asm/mmu.h	2023-01-16 10:37:14.453238468 +1000
-@@ -20,6 +20,10 @@
- 	/* A local icache flush is needed before user execution can resume. */
- 	cpumask_t icache_stale_mask;
+diff -Naur linux-6.2.org/arch/riscv/include/asm/mmu.h linux-6.2/arch/riscv/include/asm/mmu.h
+--- linux-6.2.org/arch/riscv/include/asm/mmu.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/arch/riscv/include/asm/mmu.h	2023-01-16 10:37:14.453238468 +1000
+@@ -22,6 +22,10 @@
+ 	/* A local tlb flush is needed before user execution can resume. */
+ 	cpumask_t tlb_stale_mask;
  #endif
 +#ifdef CONFIG_BINFMT_ELF_FDPIC
 +	unsigned long exec_fdpic_loadmap;
@@ -79,9 +79,9 @@ diff -Naur linux-6.1.org/arch/riscv/include/asm/mmu.h linux-6.1/arch/riscv/inclu
  } mm_context_t;
  
  void __init create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa,
-diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
---- linux-6.1.org/fs/binfmt_elf_fdpic.c	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/fs/binfmt_elf_fdpic.c	2023-01-16 10:36:49.509114322 +1000
+diff -Naur linux-6.2.org/fs/binfmt_elf_fdpic.c linux-6.2/fs/binfmt_elf_fdpic.c
+--- linux-6.2.org/fs/binfmt_elf_fdpic.c	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/fs/binfmt_elf_fdpic.c	2023-01-16 10:36:49.509114322 +1000
 @@ -138,7 +138,7 @@
  static int elf_fdpic_fetch_phdrs(struct elf_fdpic_params *params,
  				 struct file *file)
@@ -91,7 +91,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  	unsigned long size;
  	int retval, loop;
  	loff_t pos = params->hdr.e_phoff;
-@@ -559,8 +559,8 @@
+@@ -560,8 +560,8 @@
  	sp &= ~7UL;
  
  	/* stack the load map(s) */
@@ -102,7 +102,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  	sp = (sp - len) & ~7UL;
  	exec_params->map_addr = sp;
  
-@@ -570,8 +570,8 @@
+@@ -571,8 +571,8 @@
  	current->mm->context.exec_fdpic_loadmap = (unsigned long) sp;
  
  	if (interp_params->loadmap) {
@@ -113,7 +113,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  			interp_params->loadmap->nsegs;
  		sp = (sp - len) & ~7UL;
  		interp_params->map_addr = sp;
-@@ -739,12 +739,12 @@
+@@ -740,12 +740,12 @@
  			      struct mm_struct *mm,
  			      const char *what)
  {
@@ -130,7 +130,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  	unsigned long load_addr, stop;
  	unsigned nloads, tmp;
  	size_t size;
-@@ -766,7 +766,7 @@
+@@ -767,7 +767,7 @@
  
  	params->loadmap = loadmap;
  
@@ -139,7 +139,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  	loadmap->nsegs = nloads;
  
  	load_addr = params->load_addr;
-@@ -842,8 +842,8 @@
+@@ -843,8 +843,8 @@
  			if (phdr->p_vaddr >= seg->p_vaddr &&
  			    phdr->p_vaddr + phdr->p_memsz <=
  			    seg->p_vaddr + seg->p_memsz) {
@@ -150,7 +150,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  
  				params->dynamic_addr =
  					(phdr->p_vaddr - seg->p_vaddr) +
-@@ -853,11 +853,11 @@
+@@ -854,11 +854,11 @@
  				 * one item, and that the last item is a NULL
  				 * entry */
  				if (phdr->p_memsz == 0 ||
@@ -165,7 +165,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  				if (get_user(d_tag, &dyn[tmp - 1].d_tag) ||
  				    d_tag != 0)
  					goto dynamic_error;
-@@ -926,8 +926,8 @@
+@@ -927,8 +927,8 @@
  	struct file *file,
  	struct mm_struct *mm)
  {
@@ -176,7 +176,7 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  	unsigned long load_addr, base = ULONG_MAX, top = 0, maddr = 0;
  	int loop, ret;
  
-@@ -1010,8 +1010,8 @@
+@@ -1011,8 +1011,8 @@
  					     struct file *file,
  					     struct mm_struct *mm)
  {
@@ -187,9 +187,9 @@ diff -Naur linux-6.1.org/fs/binfmt_elf_fdpic.c linux-6.1/fs/binfmt_elf_fdpic.c
  	unsigned long load_addr, delta_vaddr;
  	int loop, dvset;
  
-diff -Naur linux-6.1.org/fs/Kconfig.binfmt linux-6.1/fs/Kconfig.binfmt
---- linux-6.1.org/fs/Kconfig.binfmt	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/fs/Kconfig.binfmt	2023-01-16 10:38:19.749564885 +1000
+diff -Naur linux-6.2.org/fs/Kconfig.binfmt linux-6.2/fs/Kconfig.binfmt
+--- linux-6.2.org/fs/Kconfig.binfmt	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/fs/Kconfig.binfmt	2023-01-16 10:38:19.749564885 +1000
 @@ -58,7 +58,7 @@
  config BINFMT_ELF_FDPIC
  	bool "Kernel support for FDPIC ELF binaries"
@@ -199,9 +199,9 @@ diff -Naur linux-6.1.org/fs/Kconfig.binfmt linux-6.1/fs/Kconfig.binfmt
  	select ELFCORE
  	help
  	  ELF FDPIC binaries are based on ELF, but allow the individual load
-diff -Naur linux-6.1.org/include/linux/elf-fdpic.h linux-6.1/include/linux/elf-fdpic.h
---- linux-6.1.org/include/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/include/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
+diff -Naur linux-6.2.org/include/linux/elf-fdpic.h linux-6.2/include/linux/elf-fdpic.h
+--- linux-6.2.org/include/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/include/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
 @@ -10,13 +10,25 @@
  
  #include <uapi/linux/elf-fdpic.h>
@@ -229,9 +229,9 @@ diff -Naur linux-6.1.org/include/linux/elf-fdpic.h linux-6.1/include/linux/elf-f
  	unsigned long			elfhdr_addr;	/* mapped ELF header user address */
  	unsigned long			ph_addr;	/* mapped PT_PHDR user address */
  	unsigned long			map_addr;	/* mapped loadmap user address */
-diff -Naur linux-6.1.org/include/uapi/linux/elf-fdpic.h linux-6.1/include/uapi/linux/elf-fdpic.h
---- linux-6.1.org/include/uapi/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/include/uapi/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
+diff -Naur linux-6.2.org/include/uapi/linux/elf-fdpic.h linux-6.2/include/uapi/linux/elf-fdpic.h
+--- linux-6.2.org/include/uapi/linux/elf-fdpic.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/include/uapi/linux/elf-fdpic.h	2023-01-16 10:36:49.509114322 +1000
 @@ -32,4 +32,19 @@
  
  #define ELF32_FDPIC_LOADMAP_VERSION	0x0000
@@ -252,9 +252,9 @@ diff -Naur linux-6.1.org/include/uapi/linux/elf-fdpic.h linux-6.1/include/uapi/l
 +#define ELF64_FDPIC_LOADMAP_VERSION	0x0000
 +
  #endif /* _UAPI_LINUX_ELF_FDPIC_H */
-diff -Naur linux-6.1.org/include/uapi/linux/ptrace.h linux-6.1/include/uapi/linux/ptrace.h
---- linux-6.1.org/include/uapi/linux/ptrace.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.1/include/uapi/linux/ptrace.h	2023-01-16 10:37:14.453238468 +1000
+diff -Naur linux-6.2.org/include/uapi/linux/ptrace.h linux-6.2/include/uapi/linux/ptrace.h
+--- linux-6.2.org/include/uapi/linux/ptrace.h	2022-08-01 07:03:01.000000000 +1000
++++ linux-6.2/include/uapi/linux/ptrace.h	2023-01-16 10:37:14.453238468 +1000
 @@ -24,6 +24,12 @@
  
  #define PTRACE_SYSCALL		  24

@@ -60,7 +60,7 @@ diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
 index 87badeae3181..f9e46fdcdbeb 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -305,12 +305,30 @@ config MMU
+@@ -308,12 +308,30 @@ config MMU
  	  Select if you want MMU-based virtualised addressing space
  	  support by paged memory management. If unsure, say 'Y'.
  
