@@ -252,19 +252,18 @@ diff -Naur linux-6.2.org/include/uapi/linux/elf-fdpic.h linux-6.2/include/uapi/l
 +#define ELF64_FDPIC_LOADMAP_VERSION	0x0000
 +
  #endif /* _UAPI_LINUX_ELF_FDPIC_H */
-diff -Naur linux-6.2.org/include/uapi/linux/ptrace.h linux-6.2/include/uapi/linux/ptrace.h
---- linux-6.2.org/include/uapi/linux/ptrace.h	2022-08-01 07:03:01.000000000 +1000
-+++ linux-6.2/include/uapi/linux/ptrace.h	2023-01-16 10:37:14.453238468 +1000
-@@ -24,6 +24,12 @@
+diff -Naur linux-6.2.org/arch/riscv/include/uapi/asm/ptrace.h.org linux-6.2/arch/riscv/include/uapi/asm/ptrace.h
+--- linux-6.2.org/arch/riscv/include/uapi/asm/ptrace.h.org	2023-02-22 23:51:05.103505645 +1000
++++ linux-6.2/arch/riscv/include/uapi/asm/ptrace.h	2023-02-22 23:57:25.153850508 +1000
+@@ -10,6 +10,11 @@
  
- #define PTRACE_SYSCALL		  24
+ #include <linux/types.h>
  
-+#define PTRACE_GETFDPIC		  31
++#define PTRACE_GETFDPIC		31
 +
 +#define PTRACE_GETFDPIC_EXEC	0
 +#define PTRACE_GETFDPIC_INTERP	1
 +
-+
- /* 0x4200-0x4300 are reserved for architecture-independent additions.  */
- #define PTRACE_SETOPTIONS	0x4200
- #define PTRACE_GETEVENTMSG	0x4201
+ /*
+  * User-mode register state for core dumps, ptrace, sigcontext
+  *
