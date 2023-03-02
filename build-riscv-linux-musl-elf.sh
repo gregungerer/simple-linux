@@ -33,7 +33,7 @@ BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
 MUSL_VERSION=1.2.3
 LINUX_VERSION=6.2
-BUSYBOX_VERSION=1.35.0
+BUSYBOX_VERSION=1.36.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

@@ -30,7 +30,7 @@ GCC_VERSION=12.2.0
 ELF2FLT_VERSION=2019.12
 UCLIBC_NG_VERSION=1.0.42
 LINUX_VERSION=6.2
-BUSYBOX_VERSION=1.35.0
+BUSYBOX_VERSION=1.36.0
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -201,6 +201,7 @@ build_linux()
 	cd linux-${LINUX_VERSION}
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- ${BOARD}_defconfig
 
+	sed -i "s/# CONFIG_SYSFS is not set/CONFIG_SYSFS=y/" .config
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
 	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
