@@ -27,7 +27,7 @@ BOARD=m5208evb
 
 BINUTILS_VERSION=2.39
 GCC_VERSION=12.2.0
-ELF2FLT_VERSION=2019.12
+ELF2FLT_VERSION=2021.08
 UCLIBC_NG_VERSION=1.0.42
 LINUX_VERSION=6.2
 BUSYBOX_VERSION=1.36.0
@@ -143,7 +143,10 @@ build_elf2flt()
 	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
 	cd elf2flt-${ELF2FLT_VERSION}
 
-	patch -p1 < ../patches/elf2flt-bfd-section-fixes.patch
+	patch -p1 < ../patches/elf2flt-handle-binutils-2.34.patch
+	patch -p1 < ../patches/elf2flt-Revert-fix-for-segfault-on-some-ARM-ELFs.patch
+	patch -p1 < ../patches/elf2flt-Revert-fix-relocations-for-read-only-data.patch
+	patch -p1 < ../patches/elf2flt-force-ARM.exidx-section-into-text.patch
 
 	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
 		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
