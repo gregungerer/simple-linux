@@ -146,7 +146,10 @@ build_elf2flt()
 	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
 	cd elf2flt-${ELF2FLT_VERSION}
 
-	patch -p1 < ../patches/elf2flt-bfd-section-fixes.patch
+	patch -p1 < ../patches/elf2flt-handle-binutils-2.34.patch
+	patch -p1 < ../patches/elf2flt-Revert-fix-for-segfault-on-some-ARM-ELFs.patch
+	patch -p1 < ../patches/elf2flt-Revert-fix-relocations-for-read-only-data.patch
+	patch -p1 < ../patches/elf2flt-force-ARM.exidx-section-into-text.patch
 
 	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
 		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \

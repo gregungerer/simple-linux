@@ -1,0 +1,41 @@
+From 29c6e0896ee72b1790feb8501e12ea4d5403452e Mon Sep 17 00:00:00 2001
+From: Greg Ungerer <gerg@kernel.org>
+Date: Wed, 15 Mar 2023 23:01:00 +1000
+Subject: [PATCH 2/3] Revert "elf2flt: fix relocations for read-only data"
+
+This reverts commit 73325b7f209e0f68887333385184af275531427d.
+
+Although this fixed the simple problem case (elf2flt core dumping on
+binutils newer than 2.33.1) it causes further breakage that required
+further hacks to fix that resulted in more breakage.
+
+Back all of these changes out and find a better way.
+
+Signed-off-by: Greg Ungerer <gerg@kernel.org>
+---
+ elf2flt.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/elf2flt.c b/elf2flt.c
+index 9edbe9b..0662fd8 100644
+--- a/elf2flt.c
++++ b/elf2flt.c
+@@ -419,12 +419,10 @@ output_relocs (
+ //		continue;
+ 
+ 	/*
+-	 * Only relocate things in the writable data sections if we are PIC/GOT.
+-	 * Otherwise do text (and read only data) as well.
++	 *	Only relocate things in the data sections if we are PIC/GOT.
++	 *	otherwise do text as well
+ 	 */
+-	if ((!pic_with_got || ALWAYS_RELOC_TEXT) &&
+-	    ((a->flags & SEC_CODE) ||
+-	    ((a->flags & (SEC_DATA | SEC_READONLY)) == (SEC_DATA | SEC_READONLY))))
++	if ((!pic_with_got || ALWAYS_RELOC_TEXT) && (a->flags & SEC_CODE))
+ 		sectionp = text + (a->vma - text_vma);
+ 	else if (a->flags & SEC_DATA)
+ 		sectionp = data + (a->vma - data_vma);
+-- 
+2.25.1
+
