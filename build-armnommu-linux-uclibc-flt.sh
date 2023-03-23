@@ -151,10 +151,7 @@ build_elf2flt()
 	patch -p1 < ../patches/elf2flt-Revert-fix-relocations-for-read-only-data.patch
 	patch -p1 < ../patches/elf2flt-force-ARM.exidx-section-into-text.patch
 
-	./configure --with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/libbfd.a \
-		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
-		--with-bfd-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd \
-		--with-binutils-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/include \
+	./configure --with-binutils-build-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION} \
 		--disable-werror \
 		--prefix=${TOOLCHAIN} \
 		--target=${TARGET}
