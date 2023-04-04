@@ -1,4 +1,4 @@
-From 1c5eede10b7285343db5899c94ec9a270bf40131 Mon Sep 17 00:00:00 2001
+From c70b9f20897976ee219c3f5e66187bae5ede310f Mon Sep 17 00:00:00 2001
 From: Romain Naour <romain.naour@smile.fr>
 Date: Wed, 5 Feb 2020 10:31:32 +0100
 Subject: [PATCH] elf2flt: handle binutils >= 2.34
@@ -24,13 +24,107 @@ Upstream status: [4]
 [4] https://github.com/uclinux-dev/elf2flt/pull/15
 
 Signed-off-by: Romain Naour <romain.naour@smile.fr>
+
+Two changes made to original patch:
+. $binutils_include_dir used for binutils version check
+. configure script regenerated (run autoconf)
+
+Signed-off-by: Greg Ungerer <gerg@kernel.org>
 ---
+ configure    | 41 +++++++++++++++++++++++++-
  configure.ac | 16 +++++++++++
  elf2flt.c    | 81 +++++++++++++++++++++++++++++-----------------------
- 2 files changed, 61 insertions(+), 36 deletions(-)
+ 3 files changed, 101 insertions(+), 37 deletions(-)
 
+diff --git a/configure b/configure
+index be48b95..aab5e7f 100755
+--- a/configure
++++ b/configure
+@@ -676,6 +676,7 @@ infodir
+ docdir
+ oldincludedir
+ includedir
++runstatedir
+ localstatedir
+ sharedstatedir
+ sysconfdir
+@@ -759,6 +760,7 @@ datadir='${datarootdir}'
+ sysconfdir='${prefix}/etc'
+ sharedstatedir='${prefix}/com'
+ localstatedir='${prefix}/var'
++runstatedir='${localstatedir}/run'
+ includedir='${prefix}/include'
+ oldincludedir='/usr/include'
+ docdir='${datarootdir}/doc/${PACKAGE}'
+@@ -1011,6 +1013,15 @@ do
+   | -silent | --silent | --silen | --sile | --sil)
+     silent=yes ;;
+ 
++  -runstatedir | --runstatedir | --runstatedi | --runstated \
++  | --runstate | --runstat | --runsta | --runst | --runs \
++  | --run | --ru | --r)
++    ac_prev=runstatedir ;;
++  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
++  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
++  | --run=* | --ru=* | --r=*)
++    runstatedir=$ac_optarg ;;
++
+   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
+     ac_prev=sbindir ;;
+   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
+@@ -1148,7 +1159,7 @@ fi
+ for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
+ 		datadir sysconfdir sharedstatedir localstatedir includedir \
+ 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
+-		libdir localedir mandir
++		libdir localedir mandir runstatedir
+ do
+   eval ac_val=\$$ac_var
+   # Remove trailing slashes.
+@@ -1301,6 +1312,7 @@ Fine tuning of the installation directories:
+   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
+   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
+   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
++  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
+   --libdir=DIR            object code libraries [EPREFIX/lib]
+   --includedir=DIR        C header files [PREFIX/include]
+   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
+@@ -4379,6 +4391,33 @@ fi
+ done
+ 
+ 
++if test "$binutils_include_dir" != "NONE"; then
++    CFLAGS="-I$binutils_include_dir -I$bfd_include_dir $CFLAGS"
++fi
++
++cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++#include <bfd.h>
++int
++main ()
++{
++const asection *sec; bfd_section_size(sec);
++  ;
++  return 0;
++}
++_ACEOF
++if ac_fn_c_try_compile "$LINENO"; then :
++  bfd_section_api_takes_bfd=no
++else
++  bfd_section_api_takes_bfd=yes
++fi
++rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
++if test "$bfd_section_api_takes_bfd" = "yes" ; then
++
++$as_echo "#define HAVE_BFD_SECTION_API_TAKES_BFD 1" >>confdefs.h
++
++fi
++
+ if test "$GCC" = yes ; then
+ 	CFLAGS="-Wall $CFLAGS"
+ 	if test "$werror" = 1 ; then
 diff --git a/configure.ac b/configure.ac
-index b7db2cb..fdc0876 100644
+index b7db2cb..f0fa1bf 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -229,6 +229,22 @@ AC_CHECK_FUNCS([ \
@@ -40,7 +134,7 @@ index b7db2cb..fdc0876 100644
 +dnl Various bfd section macros and functions like bfd_section_size() have been
 +dnl modified starting with binutils >= 2.34.
 +dnl Check if the prototypes take a bfd argument.
-+if test "$binutils_build_dir" != "NONE"; then
++if test "$binutils_include_dir" != "NONE"; then
 +    CFLAGS="-I$binutils_include_dir -I$bfd_include_dir $CFLAGS"
 +fi
 +
