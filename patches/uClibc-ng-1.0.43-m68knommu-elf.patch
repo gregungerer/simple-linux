@@ -1,7 +1,7 @@
 From c2e47515b7ca9d6398105888063d1aa0a18508d3 Mon Sep 17 00:00:00 2001
 From: Greg Ungerer <gerg@linux-m68k.org>
 Date: Tue, 26 Apr 2022 12:14:24 +1000
-Subject: [PATCH] uClibc-0.9.33.2: add ELF-FDPIC support for m68knommu
+Subject: [PATCH] uClibc-ng: add ELF-FDPIC support for m68knommu
 
 Add support for ELF-FDPIC executables to the m68k startup code.
 This is really just ELF support not full FDPIC support.
@@ -10,17 +10,14 @@ The relocation (link/loading) is done in a separate uld.so.1 (ELF
 interpreter) binary. Just a few tweaks in here to get the stack
 arguments right for the slight differences with the ELF-FDPIC loader.
 
-This is a work in progress and used for testing the kernels new m68k
-ELF-FDPIC support.
-
 Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
 ---
- crt1.S |   68 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
- 1 file changed, 59 insertions(+), 9 deletions(-)
+ libc/sysdeps/linux/m68k/crt1.S |   10 ++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/libc/sysdeps/linux/m68k/crt1.S b/libc/sysdeps/linux/m68k/crt1.S
---- uClibc/libc/sysdeps/linux/m68k/crt1.S.org	2022-04-24 10:21:31.336553342 +1000
-+++ uClibc/libc/sysdeps/linux/m68k/crt1.S	2022-04-26 01:27:51.799747075 +1000
+--- a/libc/sysdeps/linux/m68k/crt1.S	2022-04-24 10:21:31.336553342 +1000
++++ b/libc/sysdeps/linux/m68k/crt1.S	2022-04-26 01:27:51.799747075 +1000
 @@ -78,9 +78,13 @@
  	sub.l %fp, %fp
  
