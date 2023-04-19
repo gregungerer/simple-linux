@@ -33,7 +33,7 @@ LINUX_VERSION=6.2
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
-UCLIBC_NG_URL=https://www.uclibc.org/downloads/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
+UCLIBC_NG_URL=http://downloads.uclibc-ng.org/releases/${UCLIBC_NG_VERSION}/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
 ULDSO_URL=https://github.com/gregungerer/uldso/archive/refs/tags/v${ULDSO_VERSION}.tar.gz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
