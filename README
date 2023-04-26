@@ -37,7 +37,7 @@ the simple-linux files locally, run the build script:
 
 and then run the resulting system:
 
-   qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.2/vmlinux
+   qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.3/vmlinux
 
 There is also now an experimental build using ELF format executables.
 You can try that out with:
@@ -58,7 +58,7 @@ simple ARM systems.
 
 and then run the resulting system:
 
-    qemu-system-arm -M versatilepb -nographic -kernel linux-6.2/arch/arm/boot/zImage -dtb linux-6.2/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
+    qemu-system-arm -M versatilepb -nographic -kernel linux-6.3/arch/arm/boot/zImage -dtb linux-6.3/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
 
 There is also a uclibc based ARM build:
 
@@ -81,7 +81,7 @@ build:
 
 and then run the resulting system:
 
-    qemu-system-arm -M versatilepb -nographic -kernel linux-6.2/arch/arm/boot/zImage -dtb linux-6.2/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
+    qemu-system-arm -M versatilepb -nographic -kernel linux-6.3/arch/arm/boot/zImage -dtb linux-6.3/arch/arm/boot/dts/versatile-pb.dtb -append "console=ttyAMA0,115200"
 
 There is also now an experimental build using ELF format executables.
 You can try that out with:
@@ -104,7 +104,7 @@ builds. Build with:
 
 and then run the resulting system:
 
-    qemu-system-riscv64 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-6.2/arch/riscv/boot/Image -append "console=ttyS0"
+    qemu-system-riscv64 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-6.3/arch/riscv/boot/Image -append "console=ttyS0"
 
 Or alternatively you can do a build using uClibc instead of musl with:
 
@@ -126,5 +126,5 @@ To build that:
 
 and then run the resulting system:
 
-    qemu-system-riscv64 -cpu rv64,mmu=false -nographic -machine virt -bios linux-6.2/arch/riscv/boot/Image
+    qemu-system-riscv64 -cpu rv64,mmu=false -nographic -machine virt -bios linux-6.3/arch/riscv/boot/Image
 

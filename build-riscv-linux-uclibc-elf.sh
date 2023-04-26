@@ -20,7 +20,7 @@
 #		-nographic \
 #		-machine virt \
 #		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
-#		-kernel linux-6.2/arch/riscv/boot/Image \
+#		-kernel linux-6.3/arch/riscv/boot/Image \
 #		-append "console=ttyS0"
 #
 
@@ -32,8 +32,8 @@ BOARD=qemu
 BINUTILS_VERSION=2.40
 GCC_VERSION=12.2.0
 UCLIBC_NG_VERSION=1.0.43
-LINUX_VERSION=6.2
 BUSYBOX_VERSION=1.36.0
+LINUX_VERSION=6.3
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
