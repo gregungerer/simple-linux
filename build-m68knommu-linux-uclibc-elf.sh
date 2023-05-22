@@ -185,7 +185,7 @@ build_finalize_rootfs()
 	mkdir -p ${ROOTFS}/sys
 
 	echo "::sysinit:/etc/rc" > ${ROOTFS}/etc/inittab
-	echo "::respawn:/bin/sh" >> ${ROOTFS}/etc/inittab
+	echo "::respawn:-/bin/sh" >> ${ROOTFS}/etc/inittab
 
 	echo "#!/bin/sh" > ${ROOTFS}/etc/rc
 	echo "mount -t proc proc /proc" >> ${ROOTFS}/etc/rc

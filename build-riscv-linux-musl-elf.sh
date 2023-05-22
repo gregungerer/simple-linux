@@ -160,7 +160,7 @@ build_finalize_rootfs()
 	ln -sf /lib/libc.so ${ROOTFS}/lib/ld-linux-riscv64-lp64d.so.1
 
 	echo "::sysinit:/etc/rc" > ${ROOTFS}/etc/inittab
-	echo "::respawn:/bin/sh" >> ${ROOTFS}/etc/inittab
+	echo "::respawn:-/bin/sh" >> ${ROOTFS}/etc/inittab
 
 	echo "#!/bin/sh" > ${ROOTFS}/etc/rc
 	echo "mount -t proc proc /proc" >> ${ROOTFS}/etc/rc
