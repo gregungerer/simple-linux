@@ -19,8 +19,7 @@
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
 #		-kernel linux-6.3/arch/arm/boot/zImage \
-#		-dtb linux-6.3/arch/arm/boot/dts/versatile-pb.dtb \
-#		-append "console=ttyAMA0,115200"
+#		-dtb linux-6.3/arch/arm/boot/dts/versatile-pb.dtb
 #
 
 CPU=arm

@@ -20,8 +20,7 @@
 #		-nographic \
 #		-machine virt \
 #		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
-#		-kernel linux-6.3/arch/riscv/boot/Image \
-#		-append "console=ttyS0"
+#		-kernel linux-6.3/arch/riscv/boot/Image
 #
 
 CPU=riscv
