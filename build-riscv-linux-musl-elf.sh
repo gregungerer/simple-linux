@@ -20,7 +20,7 @@
 #		-nographic \
 #		-machine virt \
 #		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
-#		-kernel linux-6.3/arch/riscv/boot/Image
+#		-kernel linux-6.4/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -32,7 +32,7 @@ BINUTILS_VERSION=2.40
 GCC_VERSION=13.1.0
 MUSL_VERSION=1.2.4
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.3
+LINUX_VERSION=6.4
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
