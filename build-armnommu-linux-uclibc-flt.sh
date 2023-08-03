@@ -27,8 +27,8 @@ TARGET=arm-uclinuxeabi
 FLAVOR=armnommu-flt
 BOARD=versatile
 
-BINUTILS_VERSION=2.40
-GCC_VERSION=13.1.0
+BINUTILS_VERSION=2.41
+GCC_VERSION=13.2.0
 ELF2FLT_VERSION=2023.04
 UCLIBC_NG_VERSION=1.0.43
 BUSYBOX_VERSION=1.36.1
@@ -145,8 +145,11 @@ build_elf2flt()
 	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
 	cd elf2flt-${ELF2FLT_VERSION}
 
-	./configure --with-binutils-build-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION} \
-		--disable-werror \
+	./configure --disable-werror \
+		--with-binutils-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/include \
+		--with-bfd-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd \
+		--with-libbfd=${ROOTDIR}/binutils-${BINUTILS_VERSION}/bfd/.libs/libbfd.a \
+		--with-libiberty=${ROOTDIR}/binutils-${BINUTILS_VERSION}/libiberty/libiberty.a \
 		--prefix=${TOOLCHAIN} \
 		--target=${TARGET}
 	make || exit 1
