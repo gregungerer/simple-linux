@@ -1,20 +1,20 @@
 From ab7647c2b04501297c50ce7cdb6f6895b9582d22 Mon Sep 17 00:00:00 2001
 From: Greg Ungerer <gerg@kernel.org>
 Date: Fri, 21 Apr 2023 00:21:38 +1000
-Subject: [PATCH] fs: binfmt_elf_efpic: fix personality for non-fdpic ELF
+Subject: [PATCH] fs: binfmt_elf_efpic: fix personality for fdpic ELF
 
 The elf-fdpic loader hard sets the process personality to either
 PER_LINUX_FDPIC for true elf-fdpic binaries or to PER_LINUX for
 normal ELF binaries (in this case they would be constant displacement
 compiled with -pie for example). The problem with that is that it
 will lose any other bits that may be in the ELF header personality
-("the "bug emulation" bits).
+(such as the "bug emulation" bits).
 
 On the ARM architecture the ADDR_LIMIT_32BIT flag is used to signify
 a normal 32bit binary - as opposed to a legacy 26bit address binary.
 This matters since start_thread() will set the ARM CPSR register as
-required based on this flag. If the elf-fdpic loader has lost this
-bit the process will be mis-configured and crash out pretty quickly.
+required based on this flag. If the elf-fdpic loader loses this bit
+the process will be mis-configured and crash out pretty quickly.
 
 Modify elf-fdpic loaders personality setting for ELF binaries so that
 it preserves the upper three bytes by using the SET_PERSONALITY macro
@@ -24,6 +24,11 @@ specific use case, and ARM does exactly this.
 
 Signed-off-by: Greg Ungerer <gerg@kernel.org>
 ---
+
+Is anyone out there using elf-fdpic on ARM?
+This bug seems to break it rather badly due to the loss of that
+ADDR_LIMIT_32BIT bit from the process personality.
+
  fs/binfmt_elf_fdpic.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
