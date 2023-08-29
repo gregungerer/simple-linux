@@ -20,7 +20,7 @@
 #		-cpu rv64,mmu=false \
 #		-nographic \
 #		-machine virt \
-#		-bios linux-6.4/arch/riscv/boot/Image
+#		-bios linux-6.5/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -33,7 +33,7 @@ GCC_VERSION=13.2.0
 ELF2FLT_VERSION=2023.04
 UCLIBC_NG_VERSION=1.0.43
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.4
+LINUX_VERSION=6.5
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -209,8 +209,8 @@ build_linux()
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- nommu_virt_defconfig
 
-	#echo "CONFIG_BINFMT_ELF_FDPIC=y" >> .config
-	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
+	sed -i "/CONFIG_INITRAMFS_SOURCE=/d" .config
+	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"/" >> .config
         echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- oldconfig < /dev/null

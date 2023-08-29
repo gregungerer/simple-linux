@@ -18,8 +18,8 @@
 #
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
-#		-kernel linux-6.4/arch/arm/boot/zImage \
-#		-dtb linux-6.4/arch/arm/boot/dts/versatile-pb.dtb
+#		-kernel linux-6.5/arch/arm/boot/zImage \
+#		-dtb linux-6.5/arch/arm/boot/dts/arm/versatile-pb.dtb
 #
 
 CPU=arm
@@ -31,7 +31,7 @@ BINUTILS_VERSION=2.41
 GCC_VERSION=13.2.0
 MUSL_VERSION=1.2.4
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.4
+LINUX_VERSION=6.5
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -177,6 +177,7 @@ build_linux()
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- versatile_defconfig
 
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
+	sed -i "/CONFIG_INITRAMFS_SOURCE=/d" .config
 	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
