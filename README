@@ -136,3 +136,16 @@ To build that:
 and then run the resulting system as above for flat format binaries.
 
 
+
+XTENSA nommu
+------------
+
+The first nommu support for XTENSA used the traditional flat format binaries.
+Run the build script for this with:
+
+    ./build-xtensanommu-linux-uclibc-flt.sh
+
+Run the resulting system:
+
+    qemu-system-xtensa -M lx60 -cpu dc233c -nographic -kernel linux-6.5/arch/xtensa/boot/Image.elf
+
