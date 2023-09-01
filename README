@@ -149,3 +149,12 @@ Run the resulting system:
 
     qemu-system-xtensa -M lx60 -cpu dc233c -nographic -kernel linux-6.5/arch/xtensa/boot/Image.elf
 
+There is now also an experimental XTENSA nommu build that supports ELF format
+binaries. Note this is not ELF-FDPIC, but rather PIE style ELF binaries -
+but it does use the linux kernels ELF-FDPIC program loader.
+To build that:
+
+    ./build-xtensanommu-linux-uclibc-elf.sh
+
+and then run the resulting system as above for flat format binaries.
+
