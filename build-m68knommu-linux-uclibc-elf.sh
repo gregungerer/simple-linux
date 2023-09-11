@@ -20,7 +20,7 @@
 #
 
 CPU=m68k
-TARGET=m68k-linux
+TARGET=m68k-linux-uclibc
 FLAVOR=m68knommu-elf
 BOARD=m5208evb
 
@@ -117,6 +117,7 @@ build_linux_headers()
 
 	tar xvJf downloads/linux-${LINUX_VERSION}.tar.xz
 	cd linux-${LINUX_VERSION}
+
 	make ARCH=${CPU} defconfig
 	make ARCH=${CPU} headers_install || exit 1
 	cp -a usr/include ${TOOLCHAIN}/${TARGET}/
@@ -154,7 +155,7 @@ build_uldso()
 	cd uldso-${ULDSO_VERSION}
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- EXTRA_CFLAGS="-mcpu=5208 -I${TOOLCHAIN}/${TARGET}/include"
 	mkdir -p ${ROOTFS}/lib
-	cp uld.so.1 ${ROOTFS}/lib/ld.so.1
+	cp uld.so.1 ${ROOTFS}/lib/ld-uClibc.so.0
 	cd ../
 }
 
