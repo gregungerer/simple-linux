@@ -17,7 +17,7 @@ Signed-off-by: Greg Ungerer <gerg@kernel.org>
  arch/riscv/include/asm/elf.h   |   11 ++++++++++-
  arch/riscv/include/asm/mmu.h   |    4 ++++
  fs/Kconfig.binfmt              |    2 +-
- fs/binfmt_elf_fdpic.c          |   38 +++++++++++++++++++-------------------
+ fs/binfmt_elf_fdpic.c          |   60 +++++++++++++++++++-------------------
  include/linux/elf-fdpic.h      |   14 +++++++++++++-
  include/uapi/linux/elf-fdpic.h |   15 +++++++++++++++
  include/uapi/linux/ptrace.h    |    6 ++++++
@@ -34,20 +34,6 @@ diff -Naur linux-6.5.org/arch/riscv/include/asm/elf.h linux-6.5/arch/riscv/inclu
  #define ELF_EXEC_PAGESIZE	(PAGE_SIZE)
  
  /*
-@@ -69,6 +70,13 @@
- #define ELF_HWCAP	riscv_get_elf_hwcap()
- extern unsigned long elf_hwcap;
- 
-+#define ELF_FDPIC_PLAT_INIT(_r, _exec_map_addr, _interp_map_addr, dynamic_addr) \
-+	do { \
-+		(_r)->a1 = _exec_map_addr; \
-+		(_r)->a2 = _interp_map_addr; \
-+		(_r)->a3 = dynamic_addr; \
-+	} while(0)
-+
- /*
-  * This yields a string that ld.so will use to load implementation
-  * specific libraries for optimization.  This is more specific in
 @@ -78,7 +86,6 @@
  
  #define COMPAT_ELF_PLATFORM	(NULL)
@@ -166,7 +152,23 @@ diff -Naur linux-6.5.org/fs/binfmt_elf_fdpic.c linux-6.5/fs/binfmt_elf_fdpic.c
  				if (get_user(d_tag, &dyn[tmp - 1].d_tag) ||
  				    d_tag != 0)
  					goto dynamic_error;
-@@ -923,8 +923,8 @@
+@@ -900,10 +900,12 @@
+ 	kdebug("- DYNAMIC[]: %lx", params->dynamic_addr);
+ 	seg = loadmap->segs;
+ 	for (loop = 0; loop < loadmap->nsegs; loop++, seg++)
+-		kdebug("- LOAD[%d] : %08x-%08x [va=%x ms=%x]",
++		kdebug("- LOAD[%d] : %08llx-%08llx [va=%llx ms=%llx]",
+ 		       loop,
+-		       seg->addr, seg->addr + seg->p_memsz - 1,
+-		       seg->p_vaddr, seg->p_memsz);
++		       (unsigned long long) seg->addr,
++		       (unsigned long long) seg->addr + seg->p_memsz - 1,
++		       (unsigned long long) seg->p_vaddr,
++		       (unsigned long long) seg->p_memsz);
+ 
+ 	return 0;
+ 
+@@ -923,8 +925,8 @@
  	struct file *file,
  	struct mm_struct *mm)
  {
@@ -177,7 +179,7 @@ diff -Naur linux-6.5.org/fs/binfmt_elf_fdpic.c linux-6.5/fs/binfmt_elf_fdpic.c
  	unsigned long load_addr, base = ULONG_MAX, top = 0, maddr = 0;
  	int loop, ret;
  
-@@ -1007,8 +1007,8 @@
+@@ -1007,8 +1009,8 @@
  					     struct file *file,
  					     struct mm_struct *mm)
  {
@@ -188,6 +190,32 @@ diff -Naur linux-6.5.org/fs/binfmt_elf_fdpic.c linux-6.5/fs/binfmt_elf_fdpic.c
  	unsigned long load_addr, delta_vaddr;
  	int loop, dvset;
  
+@@ -1082,9 +1084,10 @@
+ 		maddr = vm_mmap(file, maddr, phdr->p_memsz + disp, prot, flags,
+ 				phdr->p_offset - disp);
+ 
+-		kdebug("mmap[%d] <file> sz=%lx pr=%x fl=%x of=%lx --> %08lx",
+-		       loop, phdr->p_memsz + disp, prot, flags,
+-		       phdr->p_offset - disp, maddr);
++		kdebug("mmap[%d] <file> sz=%llx pr=%x fl=%x of=%llx --> %08lx",
++		       loop, (unsigned long long) phdr->p_memsz + disp,
++		       prot, flags, (unsigned long long) phdr->p_offset - disp,
++		       maddr);
+ 
+ 		if (IS_ERR_VALUE(maddr))
+ 			return (int) maddr;
+@@ -1146,8 +1149,9 @@
+ 
+ #else
+ 		if (excess > 0) {
+-			kdebug("clear[%d] ad=%lx sz=%lx",
+-			       loop, maddr + phdr->p_filesz, excess);
++			kdebug("clear[%d] ad=%llx sz=%lx", loop,
++			       (unsigned long long) maddr + phdr->p_filesz,
++			       excess);
+ 			if (clear_user((void *) maddr + phdr->p_filesz, excess))
+ 				return -EFAULT;
+ 		}
 diff -Naur linux-6.5.org/fs/Kconfig.binfmt linux-6.5/fs/Kconfig.binfmt
 --- linux-6.5.org/fs/Kconfig.binfmt	2022-08-01 07:03:01.000000000 +1000
 +++ linux-6.5/fs/Kconfig.binfmt	2023-01-16 10:38:19.749564885 +1000
