@@ -29,7 +29,7 @@ OVERLAY=xtensa_dc233c
 
 BINUTILS_VERSION=2.41
 GCC_VERSION=13.2.0
-ELF2FLT_VERSION=2023.04
+ELF2FLT_VERSION=2023.09
 UCLIBC_NG_VERSION=1.0.44
 BUSYBOX_VERSION=1.36.1
 LINUX_VERSION=6.5
@@ -161,8 +161,6 @@ build_elf2flt()
 
 	tar xvzf downloads/v${ELF2FLT_VERSION}.tar.gz
 	cd elf2flt-${ELF2FLT_VERSION}
-
-	patch -p1 < ../patches/elf2flt-${ELF2FLT_VERSION}-xtensa-fix-text-relocations.patch
 
 	./configure --disable-werror \
 		--with-binutils-include-dir=${ROOTDIR}/binutils-${BINUTILS_VERSION}/include \
