@@ -20,7 +20,7 @@
 #		-cpu rv64,mmu=false \
 #		-nographic \
 #		-machine virt \
-#		-bios linux-6.5/arch/riscv/boot/Image
+#		-bios linux-6.6/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -33,7 +33,7 @@ GCC_VERSION=13.2.0
 UCLIBC_NG_VERSION=1.0.44
 ULDSO_VERSION=1.0.4
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.5
+LINUX_VERSION=6.6
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -114,8 +114,6 @@ build_linux_headers()
 
 	tar xvJf downloads/linux-${LINUX_VERSION}.tar.xz
 	cd linux-${LINUX_VERSION}
-
-	patch -p1 < ../patches/linux-${LINUX_VERSION}-${FLAVOR}.patch
 
 	make ARCH=${CPU} defconfig
 	make ARCH=${CPU} headers_install || exit 1
