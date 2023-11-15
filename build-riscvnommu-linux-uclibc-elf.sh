@@ -31,14 +31,12 @@ BOARD=qemu
 BINUTILS_VERSION=2.41
 GCC_VERSION=13.2.0
 UCLIBC_NG_VERSION=1.0.44
-ULDSO_VERSION=1.0.4
 BUSYBOX_VERSION=1.36.1
 LINUX_VERSION=6.6
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 UCLIBC_NG_URL=http://downloads.uclibc-ng.org/releases/${UCLIBC_NG_VERSION}/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
-ULDSO_URL=https://github.com/gregungerer/uldso/archive/refs/tags/v${ULDSO_VERSION}.tar.gz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 
@@ -130,6 +128,8 @@ build_uclibc()
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
+	patch -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-nommu-elf.patch
+
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
 	sed -i "s/^RUNTIME_PREFIX=.*\$/RUNTIME_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
@@ -139,19 +139,9 @@ build_uclibc()
 	make -j${NCPU} install CROSS=${TARGET}- ARCH=${CPU} || exit 1
 
 	ln -f ${TOOLCHAIN}/${TARGET}/lib/crt1.o ${TOOLCHAIN}/${TARGET}/lib/Scrt1.o
-	cd ../
-}
-
-build_uldso()
-{
-	echo "BUILD: building uldso-${ULDSO_VERSION}"
-	fetch_file ${ULDSO_URL}
-
-	tar xvzf downloads/v${ULDSO_VERSION}.tar.gz
-	cd uldso-${ULDSO_VERSION}
-	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- EXTRA_CFLAGS="-I${TOOLCHAIN}/${TARGET}/include"
 	mkdir -p ${ROOTFS}/lib
-	cp uld.so.1 ${ROOTFS}/lib/ld-uClibc.so.0
+        cp lib/ld-uClibc-*.so ${ROOTFS}/lib/ld-uClibc.so.0
+
 	cd ../
 }
 
@@ -223,7 +213,6 @@ then
 	rm -rf gcc-${GCC_VERSION}
 	rm -rf linux-${LINUX_VERSION}
 	rm -rf uClibc-ng-${UCLIBC_NG_VERSION}
-	rm -rf uldso-${ULDSO_VERSION}
 	rm -rf busybox-${BUSYBOX_VERSION}
 	rm -rf ${TOOLCHAIN}
 	rm -rf ${ROOTFS}
@@ -239,7 +228,6 @@ build_binutils
 build_gcc
 build_linux_headers
 build_uclibc
-build_uldso
 build_busybox
 build_finalize_rootfs
 build_linux

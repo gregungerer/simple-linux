@@ -1,0 +1,211 @@
+From c2e47515b7ca9d6398105888063d1aa0a18508d3 Thu Oct 12 00:00:00 2023
+From: Greg Ungerer <gerg@linux-m68k.org>
+Date: Thu, 12 Oct 2023 12:14:24 +1000
+Subject: [PATCH] uClibc-ng: support ELF binaries in noMMU
+
+The Linux kernels ELF-FDPIC binfmt program loader can support loading and
+running conventional ELF format binaries on noMMU kernels when compiled
+appropriately. That is when they are constant displacement binaries such
+as generated using the -pie compile option.
+
+Add a configure option to allow selecting ELF binary support in noMMU
+mode configurations on architectures that support this. The main
+requirement is to generate the ldso run-time loader to perform relocation
+at load time. These configurations do not support shared libraries, so
+there is no need to generate a full shared library, only the static
+version is required.
+
+Note that for the m68k and ARM architectures that the initialized
+registers and stack layout at process startup is slightly different for
+the flat format loader and the ELF/ELF-FDPIC loaders. So we need some
+changes to the startup code (crt1.S) for them.
+
+Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
+---
+ Makerules                      |    3 +++
+ Rules.mak                      |    2 ++
+ extra/Configs/Config.in        |    9 +++++++--
+ extra/Configs/Config.in.arch   |    8 ++++++++
+ ldso/include/dl-defs.h         |    2 --
+ ldso/include/ldso.h            |    2 +-
+ ldso/ldso/arm/dl-startup.h     |    2 ++
+ ldso/ldso/m68k/dl-startup.h    |    3 +++
+ ldso/ldso/m68k/dl-sysdep.h     |    2 ++
+ ldso/ldso/riscv64/dl-startup.h |    2 ++
+ libc/sysdeps/linux/arm/crt1.S  |    2 +-
+ libc/sysdeps/linux/m68k/crt1.S |   10 +++++++---
+ 12 files changed, 38 insertions(+), 9 deletions(-)
+
+--- a/extra/Configs/Config.in
++++ b/extra/Configs/Config.in
+@@ -333,8 +333,9 @@
+ 	bool "Add support for Static Position Independent Executables (PIE)"
+ 	default n
+ 	depends on DOPIC && !UCLIBC_FORMAT_FDPIC_ELF && \
+-		(TARGET_arm || TARGET_i386 || TARGET_x86_64 || TARGET_aarch64 || \
+-		 TARGET_mips || TARGET_xtensa || TARGET_powerpc)
++		(TARGET_aarch64 || TARGET_arm || TARGET_i386 || \
++		 TARGET_m68k || TARGET_mips || TARGET_powerpc || \
++		 TARGET_riscv64 || TARGET_x86_64 || TARGET_xtensa)
+ 
+ config ARCH_HAS_NO_SHARED
+ 	bool
+@@ -346,9 +346,13 @@
+ config ARCH_HAS_UCONTEXT
+ 	bool
+ 
++config HAVE_LDSO
++	bool
++
+ config HAVE_SHARED
+ 	bool "Enable shared libraries"
+ 	depends on !ARCH_HAS_NO_SHARED
++	select HAVE_LDSO
+ 	default y
+ 	help
+ 	  If you wish to build uClibc with support for shared libraries then
+--- a/extra/Configs/Config.in.arch
++++ b/extra/Configs/Config.in.arch
+@@ -10,6 +10,14 @@
+ if !ARCH_USE_MMU
+ choice
+ 	prompt "Target File Format"
++config UCLIBC_FORMAT_ELF
++	bool "ELF (using ELF_FDPIC loader)"
++	depends on !ARCH_USE_MMU && (TARGET_arm || TARGET_m68k || \
++				     TARGET_riscv64)
++	select DOPIC
++	select STATIC_PIE
++	select ARCH_HAS_NO_SHARED
++	select HAVE_LDSO
+ config UCLIBC_FORMAT_FDPIC_ELF
+ 	bool "FDPIC ELF"
+ 	depends on !ARCH_USE_MMU && (TARGET_bfin || TARGET_frv || TARGET_arm)
+--- a/Rules.mak
++++ b/Rules.mak
+@@ -167,6 +167,8 @@
+ 
+ ifneq ($(HAVE_SHARED),y)
+ libc :=
++endif
++ifneq ($(HAVE_LDSO),y)
+ interp :=
+ ldso :=
+ endif
+--- a/Makerules
++++ b/Makerules
+@@ -22,6 +22,9 @@
+ libs: $(lib-gdb-y)
+ endif
+ libs: $(lib-a-y)
++ifeq ($(HAVE_LDSO),y)
++$(lib-a-y): | $(ldso)
++endif
+ endif
+ objs: all_objs
+ $(lib-so-y) $(lib-a-y): | $(top_builddir)lib
+--- a/ldso/ldso/m68k/dl-sysdep.h
++++ b/ldso/ldso/m68k/dl-sysdep.h
+@@ -83,3 +83,5 @@
+ 		*reloc_addr = load_off + rpnt->r_addend;
+ 	} while (--relative_count);
+ }
++
++#define DL_UPDATE_LOADADDR_HDR(LOADADDR, ADDR, PHDR)
+--- a/ldso/ldso/m68k/dl-startup.h
++++ b/ldso/ldso/m68k/dl-startup.h
+@@ -55,6 +55,9 @@
+  * do something a little more subtle here.  */
+ #define GET_ARGV(ARGVP, ARGS) ARGVP = (((unsigned long *) ARGS) + 1)
+ 
++/* We can't call functions earlier in the dl startup process */
++#define NO_FUNCS_BEFORE_BOOTSTRAP
++
+ /* Handle relocation of the symbols in the dynamic loader. */
+ static __always_inline
+ void PERFORM_BOOTSTRAP_RELOC(ELF_RELOC *rpnt, unsigned long *reloc_addr,
+--- a/ldso/include/dl-defs.h
++++ b/ldso/include/dl-defs.h
+@@ -72,11 +72,9 @@
+ #endif
+ 
+ #ifdef _LIBC
+-#ifndef __ARCH_HAS_NO_SHARED__
+ /* arch specific defines */
+ #include <dl-sysdep.h>
+ #endif
+-#endif
+ 
+ /* Provide a means for a port to pass additional arguments to the _dl_start
+    function.  */
+--- a/ldso/include/ldso.h
++++ b/ldso/include/ldso.h
+@@ -48,7 +48,7 @@
+ /* Pull in the MIN macro */
+ #include <sys/param.h>
+ /* Pull in the ldso syscalls and string functions */
+-#ifndef __ARCH_HAS_NO_SHARED__
++#if !defined(__ARCH_HAS_NO_SHARED__) || !defined(__ARCH_HAS_NO_LDSO__)
+ #include <dl-syscall.h>
+ #include <dl-string.h>
+ /* Now the ldso specific headers */
+--- a/libc/sysdeps/linux/m68k/crt1.S
++++ b/libc/sysdeps/linux/m68k/crt1.S
+@@ -78,9 +78,13 @@
+ 	sub.l %fp, %fp
+ 
+ #if !defined __ARCH_USE_MMU__ && defined __PIC__
++#ifdef UCLIBC_FORMAT_ELF
++	move.l #_GLOBAL_OFFSET_TABLE_, %a5
++#else
+ 	/* Set up the global pointer.  The GOT is at the beginning of the
+ 	   data segment, whose address is in %d5.  */
+ 	move.l %d5,%a5
++#endif
+ 	.equ have_current_got, 1
+ #endif
+ 	
+@@ -92,11 +96,11 @@
+ 	   arguments for `main': argc, argv.  envp will be determined
+ 	   later in __libc_start_main.  */
+ 	move.l (%sp)+, %d0	/* Pop the argument count.  */
+-#ifndef __ARCH_USE_MMU__
+-	move.l (%sp)+, %a0
+-#else
++#if defined(__ARCH_USE_MMU__) || defined(__UCLIBC_FORMAT_ELF__)
+ 	move.l %sp, %a0		/* The argument vector starts just at the
+ 				   current stack top.  */
++#else
++	move.l (%sp)+, %a0
+ #endif
+ 
+ 	/* Provide the highest stack address to the user code (for stacks
+--- a/libc/sysdeps/linux/arm/crt1.S
++++ b/libc/sysdeps/linux/arm/crt1.S
+@@ -245,7 +245,7 @@
+ 	mov fp, #0
+ 	mov lr, #0
+ 
+-#ifdef __ARCH_USE_MMU__
++#if defined(__ARCH_USE_MMU__) || defined(__UCLIBC_FORMAT_ELF__)
+ #ifdef L_rcrt1
+ 	/* We don't need to save a1 since no dynamic linker should have run */
+ 	ldr a1, .L_GOT          /* Get value at .L_GOT + 0  (offset to GOT)*/
+--- a/ldso/ldso/arm/dl-startup.h
++++ b/ldso/ldso/arm/dl-startup.h
+@@ -301,3 +301,5 @@
+   _dl_exit(1);
+ }
+ #endif /* __FDPIC__ */
++
++#define DL_UPDATE_LOADADDR_HDR(LOADADDR, ADDR, PHDR)
+--- a/ldso/ldso/riscv64/dl-startup.h
++++ b/ldso/ldso/riscv64/dl-startup.h
+@@ -88,3 +88,5 @@
+ 			_dl_exit(1);
+ 	}
+ }
++
++#define DL_UPDATE_LOADADDR_HDR(LOADADDR, ADDR, PHDR)
+-- 
+2.25.1
