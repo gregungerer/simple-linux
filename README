@@ -162,3 +162,18 @@ To build that:
 
 and then run the resulting system as above for flat format binaries.
 
+
+
+ALPHA
+-----
+
+It is simple to create an ALPHA architecture build target that runs under
+qemu. This is useful for testing the kernel and uClibc on alpha. To build
+that:
+
+    ./build-alpha-linux-uclibc-elf.sh
+
+Run the resulting system:
+
+    qemu-system-alpha -kernel linux-6.6/vmlinux
+
