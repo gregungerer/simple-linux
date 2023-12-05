@@ -26,7 +26,7 @@ Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
  Rules.mak                      |    2 ++
  extra/Configs/Config.in        |    9 +++++++--
  extra/Configs/Config.in.arch   |    8 ++++++++
- ldso/include/dl-defs.h         |    2 --
+ ldso/include/dl-defs.h         |    2 +-
  ldso/include/ldso.h            |    2 +-
  ldso/ldso/arm/dl-startup.h     |    2 ++
  ldso/ldso/m68k/dl-startup.h    |    3 +++
@@ -34,7 +34,7 @@ Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
  ldso/ldso/riscv64/dl-startup.h |    2 ++
  libc/sysdeps/linux/arm/crt1.S  |    2 +-
  libc/sysdeps/linux/m68k/crt1.S |   10 +++++++---
- 12 files changed, 38 insertions(+), 9 deletions(-)
+ 12 files changed, 39 insertions(+), 8 deletions(-)
 
 --- a/extra/Configs/Config.in
 +++ b/extra/Configs/Config.in
@@ -126,18 +126,15 @@ Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
  void PERFORM_BOOTSTRAP_RELOC(ELF_RELOC *rpnt, unsigned long *reloc_addr,
 --- a/ldso/include/dl-defs.h
 +++ b/ldso/include/dl-defs.h
-@@ -72,11 +72,9 @@
+@@ -72,7 +72,7 @@
  #endif
  
  #ifdef _LIBC
 -#ifndef __ARCH_HAS_NO_SHARED__
++#ifndef __ARCH_HAS_NO_LDSO__
  /* arch specific defines */
  #include <dl-sysdep.h>
  #endif
--#endif
- 
- /* Provide a means for a port to pass additional arguments to the _dl_start
-    function.  */
 --- a/ldso/include/ldso.h
 +++ b/ldso/include/ldso.h
 @@ -48,7 +48,7 @@
