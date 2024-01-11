@@ -3,7 +3,7 @@
 #
 # build-riscvnommu-linux-uclibc-flt.sh -- build really simple nommu linux for RISC-V
 #
-# (C) Copyright 2022-2023, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2024, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of a RISCV-V based user space
 # and linux for use with the standard qemu emulated machine.
@@ -20,7 +20,7 @@
 #		-cpu rv64,mmu=false \
 #		-nographic \
 #		-machine virt \
-#		-bios linux-6.6/arch/riscv/boot/Image
+#		-bios linux-6.7/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -33,7 +33,7 @@ GCC_VERSION=13.2.0
 ELF2FLT_VERSION=2023.09
 UCLIBC_NG_VERSION=1.0.44
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.6
+LINUX_VERSION=6.7
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
