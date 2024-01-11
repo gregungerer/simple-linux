@@ -26,7 +26,7 @@ BOARD=qemu
 
 BINUTILS_VERSION=2.41
 GCC_VERSION=13.2.0
-UCLIBC_NG_VERSION=1.0.44
+UCLIBC_NG_VERSION=1.0.45
 BUSYBOX_VERSION=1.36.1
 LINUX_VERSION=6.7
 
@@ -121,8 +121,6 @@ build_uClibc()
 	tar xvJf downloads/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
-
-	patch -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-nommu-elf.patch
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
