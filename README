@@ -94,6 +94,12 @@ There is also a system build using ELF-FDPIC format binaries. The running
 system is essentially indistinguishable from any other nommu ARM system,
 as you would expect. Run with QEMU command line as above.
 
+If you want an ARM Cortex-M based system then you can do that too.
+Build a Cortex-3 based MPS2-AN385 system and run that in qemu with:
+
+    ./build-cortexm-linux-uclibc-flt.sh
+    qemu-system-arm -M mps2-an385 -cpu cortex-m3 -nographic -kernel bootwrapper/linux.axf
+
 
 
 RISC-V
