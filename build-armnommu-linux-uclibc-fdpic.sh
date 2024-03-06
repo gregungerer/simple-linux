@@ -43,7 +43,9 @@ ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
 ROOTFS=${ROOTDIR}/rootfs
 
-NCPU=32
+NCPU=$(grep -c processor /proc/cpuinfo 2> /dev/null)
+[ -z "$NCPU" ] && NCPU=1
+
 PATH=${TOOLCHAIN}/bin:${PATH}
 
 fetch_file()
@@ -211,7 +213,7 @@ then
 fi
 if [ "$#" != 0 ]
 then
-	echo "usage: build-armnommu-linux-uclibc-flt.sh [clean]"
+	echo "usage: build-armnommu-linux-uclibc-fdpic.sh [clean]"
 	exit 1
 fi
 

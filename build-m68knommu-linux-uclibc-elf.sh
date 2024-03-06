@@ -40,7 +40,9 @@ ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
 ROOTFS=${ROOTDIR}/rootfs
 
-NCPU=32
+NCPU=$(grep -c processor /proc/cpuinfo 2> /dev/null)
+[ -z "$NCPU" ] && NCPU=1
+
 PATH=${TOOLCHAIN}/bin:${PATH}
 
 fetch_file()
