@@ -147,6 +147,20 @@ and then run the resulting system as above for flat format binaries.
 
 
 
+RISC-V 32-BIT
+-------------
+
+QEMU can also emulate 32-bit RISC-V processors.  Run the build script for
+taht with:
+
+    ./build-riscv32-linux-musl-elf.sh
+
+And run the resulting system with:
+
+    qemu-system-riscv32 -nographic -machine virt -bios opensbi/build/platform/generic/firmware/fw_jump.elf -kernel linux-6.7/arch/riscv/boot/Image
+
+
+
 XTENSA nommu
 ------------
 
