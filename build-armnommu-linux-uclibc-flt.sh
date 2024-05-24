@@ -18,8 +18,8 @@
 #
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
-#		-kernel linux-6.8/arch/arm/boot/zImage \
-#		-dtb linux-6.8/arch/arm/boot/dts/arm/versatile-pb.dtb
+#		-kernel linux-6.9/arch/arm/boot/zImage \
+#		-dtb linux-6.9/arch/arm/boot/dts/arm/versatile-pb.dtb
 #
 
 CPU=arm
@@ -32,7 +32,7 @@ GCC_VERSION=13.2.0
 ELF2FLT_VERSION=2024.02
 UCLIBC_NG_VERSION=1.0.46
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.8
+LINUX_VERSION=6.9
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
