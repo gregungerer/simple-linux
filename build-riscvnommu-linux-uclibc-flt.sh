@@ -132,6 +132,9 @@ build_uclibc()
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
+	# Revert CTOR/DTOR change until solution found
+	patch -R -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-ctor-dtor.patch
+
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
 	sed -i "s/^RUNTIME_PREFIX=.*\$/RUNTIME_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config
@@ -206,6 +209,8 @@ build_linux()
 	echo "BUILD: building linux-${LINUX_VERSION}"
 
 	cd linux-${LINUX_VERSION}
+
+	patch -p1 < ../patches/linux-${LINUX_VERSION}-riscnommu-flat.patch
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- nommu_virt_defconfig
 
