@@ -210,8 +210,6 @@ build_linux()
 
 	cd linux-${LINUX_VERSION}
 
-	patch -p1 < ../patches/linux-${LINUX_VERSION}-riscnommu-flat.patch
-
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- nommu_virt_defconfig
 
 	sed -i "/CONFIG_INITRAMFS_SOURCE=/d" .config
