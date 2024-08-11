@@ -31,7 +31,7 @@ GCC_VERSION=13.3.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.49
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.9
+LINUX_VERSION=6.10
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
