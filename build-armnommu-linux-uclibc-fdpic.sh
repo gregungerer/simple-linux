@@ -188,7 +188,7 @@ build_linux()
 	cp ../configs/linux-${LINUX_VERSION}-armnommu-${BOARD}.config .config
 
 	patch -p1 < ../patches/linux-${LINUX_VERSION}-armnommu-${BOARD}.patch
-	patch -p1 -R < ../patches/linux-${LINUX_VERSION}-binfmt_elf_fdpic-fix-proc-pid-auxv.patch
+	patch -p1 < ../patches/linux-${LINUX_VERSION}-binfmt_elf_fdpic-fix-proc-pid-auxv.patch
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- oldconfig
 	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
