@@ -18,8 +18,8 @@
 #
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
-#		-kernel linux-6.10/arch/arm/boot/zImage \
-#		-dtb linux-6.10/arch/arm/boot/dts/arm/versatile-pb.dtb
+#		-kernel linux-6.11/arch/arm/boot/zImage \
+#		-dtb linux-6.11/arch/arm/boot/dts/arm/versatile-pb.dtb
 #
 
 CPU=arm
@@ -31,7 +31,7 @@ BINUTILS_VERSION=2.43
 GCC_VERSION=14.2.0
 UCLIBC_NG_VERSION=1.0.50
 BUSYBOX_VERSION=1.36.1
-LINUX_VERSION=6.10
+LINUX_VERSION=6.11
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -188,7 +188,6 @@ build_linux()
 	cp ../configs/linux-${LINUX_VERSION}-armnommu-${BOARD}.config .config
 
 	patch -p1 < ../patches/linux-${LINUX_VERSION}-armnommu-${BOARD}.patch
-	patch -p1 < ../patches/linux-${LINUX_VERSION}-binfmt_elf_fdpic-fix-proc-pid-auxv.patch
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- oldconfig
 	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
