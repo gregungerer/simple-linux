@@ -1,7 +1,7 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 #
-# build-arm-linux-uclibc-elf.sh -- build really simple linux for arm
+# build-arm-linux-musl-elf.sh -- build really simple linux for arm
 #
 # (C) Copyright 2022-2024, Greg Ungerer (gerg@kernel.org)
 #
@@ -27,7 +27,7 @@ TARGET=arm-linux-musleabi
 FLAVOR=arm-elf
 BOARD=versatile
 
-BINUTILS_VERSION=2.43
+BINUTILS_VERSION=2.43.1
 GCC_VERSION=14.2.0
 MUSL_VERSION=1.2.5
 BUSYBOX_VERSION=1.36.1
