@@ -3,7 +3,7 @@
 #
 # build-m68knommu-linux-uclibc-flt.sh -- build really simple linux for m68knommu
 #
-# (C) Copyright 2022-2024, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2025, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of an m68knommu based user space
 # and linux for use with the ColdFire/m5208evb qemu emulated machine.
@@ -17,7 +17,7 @@
 # then builds uClibc-ng, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.12/vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-6.13/vmlinux
 #
 
 CPU=m68k
@@ -30,7 +30,7 @@ GCC_VERSION=14.2.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.51
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.12
+LINUX_VERSION=6.13
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

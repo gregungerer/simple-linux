@@ -3,7 +3,7 @@
 #
 # build-riscv32-linux-musl-elf.sh -- build really simple linux for RISC-V
 #
-# (C) Copyright 2022-2024, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2025, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of a RISC-V based (32-bit) user
 # space and linux for use with the standard qemu emulated machine.
@@ -20,7 +20,7 @@
 #		-nographic \
 #		-machine virt \
 #		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
-#		-kernel linux-6.12/arch/riscv/boot/Image
+#		-kernel linux-6.13/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -32,7 +32,7 @@ BINUTILS_VERSION=2.43.1
 GCC_VERSION=14.2.0
 MUSL_VERSION=1.2.5
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.12
+LINUX_VERSION=6.13
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
