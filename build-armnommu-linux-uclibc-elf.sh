@@ -3,7 +3,7 @@
 #
 # build-armnommu-linux-uclibc-elf.sh -- build really simple linux for armnommu
 #
-# (C) Copyright 2022-2024, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2025, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of an arm based user space
 # and linux for use with the ARM/versatile qemu emulated machine.
@@ -18,8 +18,8 @@
 #
 #	qemu-system-arm -M versatilepb \
 #		-nographic  \
-#		-kernel linux-6.12/arch/arm/boot/zImage \
-#		-dtb linux-6.12/arch/arm/boot/dts/arm/versatile-pb.dtb
+#		-kernel linux-6.13/arch/arm/boot/zImage \
+#		-dtb linux-6.13/arch/arm/boot/dts/arm/versatile-pb.dtb
 #
 
 CPU=arm
@@ -31,7 +31,7 @@ BINUTILS_VERSION=2.43.1
 GCC_VERSION=14.2.0
 UCLIBC_NG_VERSION=1.0.51
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.12
+LINUX_VERSION=6.13
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
