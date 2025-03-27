@@ -17,7 +17,7 @@
 # can be run using qemu:
 #
 #	qemu-system-arm -M versatilepb \
-#		-nographic  \
+#		-nographic \
 #		-kernel linux-6.14/arch/arm/boot/zImage \
 #		-dtb linux-6.14/arch/arm/boot/dts/arm/versatile-pb.dtb
 #
@@ -27,7 +27,7 @@ TARGET=arm-uclinuxeabi
 FLAVOR=armnommu-flt
 BOARD=versatile
 
-BINUTILS_VERSION=2.43.1
+BINUTILS_VERSION=2.44
 GCC_VERSION=14.2.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.51
