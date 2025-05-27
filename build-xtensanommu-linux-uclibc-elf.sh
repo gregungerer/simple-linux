@@ -19,7 +19,7 @@
 #	qemu-system-xtensa \
 #		-M lx60 -cpu dc233c \
 #		-nographic \
-#		-kernel linux-6.14/arch/xtensa/boot/Image.elf
+#		-kernel linux-6.15/arch/xtensa/boot/Image.elf
 #
 
 CPU=xtensa
@@ -32,7 +32,7 @@ GCC_VERSION=14.2.0
 ULDSO_VERSION=1.0.4
 UCLIBC_NG_VERSION=1.0.51
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.14
+LINUX_VERSION=6.15
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

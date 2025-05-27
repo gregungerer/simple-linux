@@ -1,6 +1,6 @@
-From 77c038d93769c92ef54cdbb50388564d1b37987b Mon Mar 24 00:00:00 2025
+From 77c038d93769c92ef54cdbb50388564d1b37987b Mon May 26 00:00:00 2025
 From: Greg Ungerer <gerg@kernel.org>
-Date: Mon, 24 Mar 2025 13:37:34 +1000
+Date: Mon, 26 May 2025 13:37:34 +1000
 Subject: [PATCH] ARM: versatile: support configuring versatile machine for no-MMU
 
 Allow the arm versatile machine to be configured for no-MMU operation.
@@ -59,7 +59,7 @@ diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
 index e24a9820e12f..342e1efa583a 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -322,12 +322,23 @@ config MMU
+@@ -323,12 +323,23 @@ config MMU
  	  Select if you want MMU-based virtualised addressing space
  	  support by paged memory management. If unsure, say 'Y'.
  
