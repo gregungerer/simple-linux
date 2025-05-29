@@ -19,7 +19,6 @@
 #	qemu-system-riscv64 \
 #		-nographic \
 #		-machine virt \
-#		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
 #		-kernel linux-6.15/arch/riscv/boot/Image
 #
 
@@ -39,7 +38,6 @@ GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
 MUSL_URL=https://musl.libc.org/releases/musl-${MUSL_VERSION}.tar.gz
 LINUX_URL=https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz
 BUSYBOX_URL=https://busybox.net/downloads/busybox-${BUSYBOX_VERSION}.tar.bz2
-OPENSBI_URL=https://github.com/riscv-software-src/opensbi.git
 
 ROOTDIR=$(pwd)
 TOOLCHAIN=${ROOTDIR}/toolchain
@@ -172,17 +170,6 @@ build_finalize_rootfs()
 	ln -sf /sbin/init ${ROOTFS}/init
 }
 
-build_opensbi()
-{
-	echo "BUILD: building opensbi firmware"
-
-	git clone -b v1.4 ${OPENSBI_URL}
-
-	cd opensbi
-	make -j${NCPU} PLATFORM=generic CROSS_COMPILE=${TARGET}- || exit 1
-	cd ../
-}
-
 build_linux()
 {
 	echo "BUILD: building linux-${LINUX_VERSION}"
@@ -214,7 +201,6 @@ then
 	rm -rf linux-${LINUX_VERSION}
 	rm -rf musl-${MUSL_VERSION}
 	rm -rf busybox-${BUSYBOX_VERSION}
-	rm -rf opensbi
 	rm -rf ${TOOLCHAIN}
 	rm -rf ${ROOTFS}
 	exit 0
@@ -231,7 +217,6 @@ build_linux_headers
 build_musl
 build_busybox
 build_finalize_rootfs
-build_opensbi
 build_linux
 
 exit 0
