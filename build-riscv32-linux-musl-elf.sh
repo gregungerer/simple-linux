@@ -19,7 +19,7 @@
 #	qemu-system-riscv32 \
 #		-nographic \
 #		-machine virt \
-#		-bios opensbi/build/platform/generic/firmware/fw_jump.elf \
+#		-bios opensbi/build/platform/generic/firmware/fw_dynamic.bin \
 #		-kernel linux-6.15/arch/riscv/boot/Image
 #
 
@@ -33,6 +33,7 @@ GCC_VERSION=14.2.0
 MUSL_VERSION=1.2.5
 BUSYBOX_VERSION=1.37.0
 LINUX_VERSION=6.15
+OPENSBI_VERSION=v1.6
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -176,7 +177,7 @@ build_opensbi()
 {
 	echo "BUILD: building opensbi firmware"
 
-	git clone -b v1.4 ${OPENSBI_URL}
+	git clone -b ${OPENSBI_VERSION} ${OPENSBI_URL}
 
 	cd opensbi
 	make -j${NCPU} PLATFORM=generic CROSS_COMPILE=${TARGET}- || exit 1
