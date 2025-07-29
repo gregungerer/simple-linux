@@ -1,6 +1,6 @@
 From 77c038d93769c92ef54cdbb50388564d1b37987b Mon May 26 00:00:00 2025
 From: Greg Ungerer <gerg@kernel.org>
-Date: Mon, 26 May 2025 13:37:34 +1000
+Date: Tue, 29 Jul 2025 13:37:34 +1000
 Subject: [PATCH] ARM: versatile: support configuring versatile machine for no-MMU
 
 Allow the arm versatile machine to be configured for no-MMU operation.
