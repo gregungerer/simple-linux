@@ -20,7 +20,7 @@
 #		-cpu rv64,mmu=false \
 #		-nographic \
 #		-machine virt \
-#		-bios linux-6.14/arch/riscv/boot/Image
+#		-bios linux-6.16/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -33,7 +33,7 @@ GCC_VERSION=15.1.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.52
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.14
+LINUX_VERSION=6.16
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
