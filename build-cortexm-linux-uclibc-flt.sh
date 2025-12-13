@@ -26,7 +26,7 @@ TARGET=arm-uclinuxeabi
 FLAVOR=cortexm-flt
 BOARD=mps2-an385
 
-BINUTILS_VERSION=2.43.1
+BINUTILS_VERSION=2.45.1
 GCC_VERSION=15.2.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.55
@@ -70,6 +70,9 @@ build_binutils()
 
 	tar xvJf downloads/binutils-${BINUTILS_VERSION}.tar.xz
 	cd binutils-${BINUTILS_VERSION}
+
+	patch -p1 -R < ../patches/0001-arm-Do-not-insert-stubs-needing-Arm-code-on-Thumb-on.patch
+
 	./configure --target=${TARGET} --prefix=${TOOLCHAIN}
 	make -j${NCPU} || exit 1
 	make install || exit 1
