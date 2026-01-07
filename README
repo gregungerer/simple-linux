@@ -48,6 +48,20 @@ It can be run with same QEMU command line as above.
 
 
 
+M68K
+----
+
+QEMU has a nice and simple Macintosh Q800 machine emulation that is ideal
+for running a simple fully MMU enabled M68K system.
+
+    ./build-m68k-linux-uclibc-elf.sh
+
+and then run the resulting system:
+
+   qemu-system-m68k -machine q800 -kernel linux-6.18/vmlinux
+
+
+
 ARM
 ---
 
