@@ -3,7 +3,7 @@
 #
 # build-cortexm-linux-uclibc-flt.sh -- build really simple linux for cortex-m
 #
-# (C) Copyright 2022-2025, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2026, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of an arm based user space
 # and linux for use with the ARM/versatile qemu emulated machine.
@@ -31,7 +31,7 @@ GCC_VERSION=15.2.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.55
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.18
+LINUX_VERSION=6.19
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
