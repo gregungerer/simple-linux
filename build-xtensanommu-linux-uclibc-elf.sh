@@ -3,7 +3,7 @@
 #
 # build-xtensanommu-linux-uclibc-elf.sh -- build really simple nommu linux for XTENSA
 #
-# (C) Copyright 2022-2025, Greg Ungerer (gerg@kernel.org)
+# (C) Copyright 2022-2026, Greg Ungerer (gerg@kernel.org)
 #
 # This script carries out a simple build of a XTENSA based user space
 # and linux for use with the standard qemu emulated machine.
@@ -19,7 +19,7 @@
 #	qemu-system-xtensa \
 #		-M lx60 -cpu dc233c \
 #		-nographic \
-#		-kernel linux-6.18/arch/xtensa/boot/Image.elf
+#		-kernel linux-6.19/arch/xtensa/boot/Image.elf
 #
 
 CPU=xtensa
@@ -32,7 +32,7 @@ GCC_VERSION=15.2.0
 ULDSO_VERSION=1.0.4
 UCLIBC_NG_VERSION=1.0.55
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=6.18
+LINUX_VERSION=6.19
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
