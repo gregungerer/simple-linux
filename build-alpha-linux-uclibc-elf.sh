@@ -16,7 +16,7 @@
 # then builds uClibc, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#	qemu-system-alpha -kernel linux-7.0/vmlinux
+#	qemu-system-alpha -kernel linux-7.1/vmlinux
 #
 
 CPU=alpha
@@ -28,7 +28,7 @@ BINUTILS_VERSION=2.46.0
 GCC_VERSION=15.2.0
 UCLIBC_NG_VERSION=1.0.57
 BUSYBOX_VERSION=1.37.0
-LINUX_VERSION=7.0
+LINUX_VERSION=7.1
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
