@@ -129,6 +129,9 @@ build_uClibc()
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
+	# Apply uClibc-ng flat format fix (fixed post 1.0.58)
+	patch -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-pagesize-restore-PAGE_SHIFT-fallback-for-binfmt_flat.patch
+
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
 	sed -i "s/^RUNTIME_PREFIX=.*\$/RUNTIME_PREFIX=\"${TOOLCHAIN_ESCAPED}\"/" .config

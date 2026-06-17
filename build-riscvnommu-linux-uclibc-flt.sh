@@ -132,8 +132,8 @@ build_uclibc()
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
 
-	# Revert CTOR/DTOR change until solution found
-	patch -R -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-ctor-dtor.patch
+	# Apply uClibc-ng flat format fix (fixed post 1.0.58)
+	patch -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-pagesize-restore-PAGE_SHIFT-fallback-for-binfmt_flat.patch
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
