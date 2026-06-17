@@ -71,7 +71,7 @@ build_binutils()
 	tar xvJf downloads/binutils-${BINUTILS_VERSION}.tar.xz
 	cd binutils-${BINUTILS_VERSION}
 
-	patch -p1 -R < ../patches/0001-arm-Do-not-insert-stubs-needing-Arm-code-on-Thumb-on.patch
+	patch -p1 -R < ../patches/binutils-arm-Do-not-insert-stubs-needing-Arm-code-on-Thumb-on.patch
 
 	./configure --target=${TARGET} --prefix=${TOOLCHAIN}
 	make -j${NCPU} || exit 1
