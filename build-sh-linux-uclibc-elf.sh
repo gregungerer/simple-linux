@@ -18,7 +18,7 @@
 #
 #	qemu-system-sh4 -M r2d -m 1024M \
 #		-serial vc -serial stdio \
-#		-kernel linux-7.1/arch/sh/boot/zImage
+#		-kernel linux-7.2/arch/sh/boot/zImage
 #
 
 CPU=sh
@@ -30,7 +30,7 @@ BINUTILS_VERSION=2.46.1
 GCC_VERSION=15.3.0
 UCLIBC_NG_VERSION=1.0.58
 BUSYBOX_VERSION=1.38.0
-LINUX_VERSION=7.1
+LINUX_VERSION=7.2
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

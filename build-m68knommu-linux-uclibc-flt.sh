@@ -17,7 +17,7 @@
 # then builds uClibc-ng, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-7.1/vmlinux
+#  qemu-system-m68k -nographic -machine mcf5208evb -kernel linux-7.2/vmlinux
 #
 
 CPU=m68k
@@ -30,7 +30,7 @@ GCC_VERSION=15.3.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.58
 BUSYBOX_VERSION=1.38.0
-LINUX_VERSION=7.1
+LINUX_VERSION=7.2
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
@@ -204,6 +204,7 @@ build_linux()
 	sed -i "s/# CONFIG_SYSFS is not set/CONFIG_SYSFS=y/" .config
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
 	sed -i "/CONFIG_INITRAMFS_SOURCE=/d" .config
+	sed -i "s/CONFIG_MODULES=y/# CONFIG_MODULES is not set/" .config
 	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
