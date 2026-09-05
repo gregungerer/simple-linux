@@ -20,7 +20,7 @@
 #		-nographic \
 #		-machine virt \
 #		-bios opensbi/build/platform/generic/firmware/fw_dynamic.bin \
-#		-kernel linux-7.1/arch/riscv/boot/Image
+#		-kernel linux-7.2/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -32,7 +32,7 @@ BINUTILS_VERSION=2.46.1
 GCC_VERSION=15.3.0
 MUSL_VERSION=1.2.6
 BUSYBOX_VERSION=1.38.0
-LINUX_VERSION=7.1
+LINUX_VERSION=7.2
 OPENSBI_VERSION=v1.6
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
