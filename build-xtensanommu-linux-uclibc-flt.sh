@@ -30,7 +30,7 @@ OVERLAY=xtensa_dc233c
 BINUTILS_VERSION=2.46.1
 GCC_VERSION=15.3.0
 ELF2FLT_VERSION=2024.05
-UCLIBC_NG_VERSION=1.0.58
+UCLIBC_NG_VERSION=1.0.59
 BUSYBOX_VERSION=1.38.0
 LINUX_VERSION=7.2
 
@@ -145,9 +145,6 @@ build_uclibc()
 	tar xvJf downloads/uClibc-ng-${UCLIBC_NG_VERSION}.tar.xz
 	cp configs/uClibc-ng-${UCLIBC_NG_VERSION}-${FLAVOR}.config uClibc-ng-${UCLIBC_NG_VERSION}/.config
 	cd uClibc-ng-${UCLIBC_NG_VERSION}
-
-	# Apply uClibc-ng flat format fix (fixed post 1.0.58)
-	patch -p1 < ../patches/uClibc-ng-${UCLIBC_NG_VERSION}-pagesize-restore-PAGE_SHIFT-fallback-for-binfmt_flat.patch
 
 	TOOLCHAIN_ESCAPED=$(echo ${TOOLCHAIN}/${TARGET} | sed 's/\//\\\//g')
 	sed -i "s/^KERNEL_HEADERS=.*\$/KERNEL_HEADERS=\"${TOOLCHAIN_ESCAPED}\/include\"/" .config
