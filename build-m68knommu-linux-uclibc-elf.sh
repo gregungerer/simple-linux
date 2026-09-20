@@ -25,7 +25,7 @@ FLAVOR=m68knommu-elf
 BOARD=m5208evb
 
 BINUTILS_VERSION=2.47
-GCC_VERSION=15.3.0
+GCC_VERSION=16.2.0
 UCLIBC_NG_VERSION=1.0.59
 BUSYBOX_VERSION=1.38.0
 LINUX_VERSION=7.2
@@ -201,7 +201,7 @@ build_linux()
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- olddefconfig < /dev/null
-	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
+	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- KCFLAGS="-fno-fuse-ops-with-volatile-access" || exit 1
 
 	cd ../
 }

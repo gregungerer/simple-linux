@@ -26,7 +26,7 @@ FLAVOR=m68knommu-flt
 BOARD=m5208evb
 
 BINUTILS_VERSION=2.47
-GCC_VERSION=15.3.0
+GCC_VERSION=16.2.0
 ELF2FLT_VERSION=2024.05
 UCLIBC_NG_VERSION=1.0.59
 BUSYBOX_VERSION=1.38.0
@@ -205,11 +205,12 @@ build_linux()
 	sed -i "s/# CONFIG_BLK_DEV_INITRD is not set/CONFIG_BLK_DEV_INITRD=y/" .config
 	sed -i "/CONFIG_INITRAMFS_SOURCE=/d" .config
 	sed -i "s/CONFIG_MODULES=y/# CONFIG_MODULES is not set/" .config
+	sed -i "s/# CONFIG_KALLSYMS is not set/CONFIG_KALLSYMS=y/" .config
 	echo "CONFIG_INITRAMFS_SOURCE=\"${ROOTFS} ${ROOTDIR}/configs/rootfs.dev\"" >> .config
 	echo "CONFIG_INITRAMFS_COMPRESSION_GZIP=y" >> .config
 
 	make ARCH=${CPU} CROSS_COMPILE=${TARGET}- olddefconfig < /dev/null
-	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- || exit 1
+	make -j${NCPU} ARCH=${CPU} CROSS_COMPILE=${TARGET}- KCFLAGS="-fno-fuse-ops-with-volatile-access" || exit 1
 
 	cd ../
 }
