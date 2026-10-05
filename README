@@ -60,6 +60,10 @@ and then run the resulting system:
 
    qemu-system-m68k -machine q800 -kernel linux-7.2/vmlinux
 
+There is also a musl based build:
+
+    ./build-m68k-linux-musl-elf.sh
+
 
 
 ARM
