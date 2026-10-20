@@ -19,7 +19,7 @@
 #	qemu-system-riscv64 \
 #		-nographic \
 #		-machine virt \
-#		-kernel linux-7.2/arch/riscv/boot/Image
+#		-kernel linux-7.3/arch/riscv/boot/Image
 #
 
 CPU=riscv
@@ -31,7 +31,7 @@ BINUTILS_VERSION=2.47
 GCC_VERSION=16.2.0
 MUSL_VERSION=1.2.6
 BUSYBOX_VERSION=1.38.0
-LINUX_VERSION=7.2
+LINUX_VERSION=7.3
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz

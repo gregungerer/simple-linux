@@ -16,7 +16,7 @@
 # then builds musl, busybox and finally a kernel. The resulting kernel
 # can be run using qemu:
 #
-#  qemu-system-m68k -machine q800 -kernel linux-7.2/vmlinux
+#  qemu-system-m68k -machine q800 -kernel linux-7.3/vmlinux
 #
 
 CPU=m68k
@@ -28,7 +28,7 @@ BINUTILS_VERSION=2.47
 GCC_VERSION=16.2.0
 MUSL_VERSION=1.2.6
 BUSYBOX_VERSION=1.38.0
-LINUX_VERSION=7.2
+LINUX_VERSION=7.3
 
 BINUTILS_URL=https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz
 GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz
